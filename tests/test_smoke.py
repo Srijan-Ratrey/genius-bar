@@ -137,3 +137,44 @@ def test_batch_length_mismatch_falls_back_per_item(monkeypatch):
 
     assert len(out) == 3, "result count must match input count"
     assert len(calls) == 4, "expected 1 failed batch + 3 per-item retries"
+
+
+# --- metrics ---------------------------------------------------------------
+
+from genius_bar import metrics  # noqa: E402
+
+
+def test_escalation_cost_is_asymmetric():
+    """Missing an escalation must cost more than escalating needlessly.
+
+    If these ever come out equal, the cost model has collapsed into plain
+    accuracy and the whole reason for a cost-weighted metric is gone.
+    """
+    missed = metrics.escalation_metrics([True] * 10, [False] + [True] * 9)
+    needless = metrics.escalation_metrics([False] * 10, [True] + [False] * 9)
+
+    assert missed["missed_escalations"] == 1
+    assert needless["needless_escalations"] == 1
+    assert missed["cost_per_100"] > needless["cost_per_100"]
+
+
+def test_trivial_never_escalate_is_visibly_bad():
+    """The trivial baseline should score 0 recall, not an accidental pass."""
+    out = metrics.escalation_metrics([True] * 3 + [False] * 7, [False] * 10)
+    assert out["recall"] == 0.0
+    assert out["missed_escalations"] == 3
+
+
+def test_agreement_separates_bias_from_correlation():
+    """A judge that is always +1 ranks perfectly but is biased -- report both."""
+    human = [1, 2, 3, 4, 5]
+    out = metrics.agreement(human, [h + 1 for h in human])
+    assert out["spearman"] == pytest.approx(1.0)
+    assert out["judge_bias"] == pytest.approx(1.0)
+    assert out["exact_match"] == 0.0
+
+
+def test_agreement_handles_flat_ratings():
+    """A judge that gives everything a 4 has undefined correlation, not a crash."""
+    out = metrics.agreement([3, 4, 5], [4, 4, 4])
+    assert out["spearman"] is None
