@@ -303,3 +303,35 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
     wrong -- it is thermal, not a reboot) but still escalated correctly, because
     the safety signal fires independently of the intent. Decoupling the risk
     read from the classification is what makes that work.
+
+## Baselines (milestone 7)
+
+50. **The trivial baseline sends Apple's actual modal reply, not an invented
+    one.** That reply -- the iOS 11 autocorrect workaround -- was sent 1,070
+    times, and it addresses the bug that dominates this corpus. So the trivial
+    baseline is genuinely hard to embarrass on a reply-quality rubric, which is
+    the point: a system that cannot clear it by a wide margin has not earned its
+    API bill.
+
+51. **Baselines use hand-written rules, not a fitted classifier.**
+    *load-bearing.* The golden set IS the test set, so fitting anything on it
+    would leak. Keyword rules need no labels and are what a competent team ships
+    in an afternoon before reaching for an LLM -- which makes them the honest
+    thing to beat.
+
+52. **The baseline was strengthened twice after watching it fail.** Its first
+    draft only matched verb-then-noun ("lost my contacts") and so missed "all my
+    contacts are gone"; and it had no notion of intent risk, so it auto-handled
+    every hardware_repair message. Both were fixed. A deliberately weak baseline
+    inflates the system's apparent gain, which is a subtler way of lying about
+    the headline number than getting the metric wrong.
+
+53. **The baseline's unmatched messages fall to the majority class, not
+    not_actionable.** That is the choice which maximises its accuracy on an
+    imbalanced set, so the comparison is against the baseline at its best.
+
+54. **Both baselines share the agent's retriever.** With retrieval held
+    constant, "copy the nearest historical reply" vs "draft from the same
+    evidence" isolates the drafting step. The simple baseline copies verbatim
+    and never paraphrases -- there is a test for that, because a paraphrasing
+    control would quietly stop being a control.
