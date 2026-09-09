@@ -1,0 +1,31 @@
+[project]
+name = "genius-bar"
+version = "0.1.0"
+description = "AI support agent for AppleSupport: intent classification, grounded reply drafting, and auto-handle vs escalate triage."
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=1.0",
+    "kagglehub>=0.3",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "pyarrow>=17.0",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+    "scikit-learn>=1.5",
+    "tenacity>=9.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["uv_build>=0.10,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "genius_bar"
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
