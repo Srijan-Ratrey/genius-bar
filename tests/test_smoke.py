@@ -385,3 +385,33 @@ def test_simple_baseline_copies_verbatim_and_does_not_synthesise():
 
     out = baselines.simple(["my battery drains fast"], FakeRetriever())
     assert out[0].draft == "EXACT HISTORICAL REPLY", "the control must not paraphrase"
+
+
+# --- labelling --------------------------------------------------------------
+
+from genius_bar import label  # noqa: E402
+
+
+def test_blind_pass_gets_no_model_suggestions():
+    """The blind pass is the evidence base; a suggestion would destroy it.
+
+    Those 60 labels are the only ones that can support the judge-agreement and
+    label-noise claims. If a model hint reaches them they stop being
+    independent, and the agreement number silently becomes a measure of the
+    model agreeing with itself.
+    """
+    todo = [
+        {"id": 1, "message": "battery dies", "pass": "blind"},
+        {"id": 2, "message": "refund me", "pass": "blind"},
+    ]
+    assert label._load_suggestions(todo) == {}, "blind items must never be pre-labelled"
+
+
+def test_jsonl_round_trip_appends(tmp_path):
+    """Progress must survive an interrupted session."""
+    path = tmp_path / "g.jsonl"
+    label.append_jsonl(path, {"id": 1, "intent": "data_loss"})
+    label.append_jsonl(path, {"id": 2, "intent": "account_billing"})
+    rows = label.read_jsonl(path)
+    assert [r["id"] for r in rows] == [1, 2]
+    assert label.read_jsonl(tmp_path / "missing.jsonl") == []
