@@ -1,0 +1,144 @@
+- cluster_id: 0
+  name: troubleshoot_data_loss
+  description: The customer wants help recovering lost data or fixing media app issues after an update.
+  is_support_request: true
+  coherent: false
+  merge_with: ''
+  size: 62
+  share: 0.1033
+  examples:
+  - Hey , what gives? My iPhone7 was just fine yesterday. 2day, I’m missing contacts. Even though I back
+    up to iCloud, they’re not there. 😡😡😡😡😡😡
+  - last night I updated the iOS on my iPhone 7. This morning I woke up to find that all my music had
+    been wiped and the cloud backup does not exist. Nothing else from my cloud has been affected. Can
+    you help?
+  - why have all my numbers deleted off my phone randomly? I have the new IOS. Help
+  - They told me to redownload my songs when I’m having an issue with a TV series. Who can help me?
+  - hello, I’ve updated to iOS 11.2 this morning, and I’ve realized that all my deleted photos were again
+    in my gallery. Idk if I’m the only one but is weird. Thank u.
+- cluster_id: 1
+  name: troubleshoot_device_crashing
+  description: The customer wants assistance fixing an iPhone that repeatedly reboots, crashes, or shuts
+    down.
+  is_support_request: true
+  coherent: true
+  merge_with: ''
+  size: 77
+  share: 0.1283
+  examples:
+  - 'Hey my #iphone now dies in 15 minutes from a full charge and I have 37GB left. Getting ready to leave
+    forever. Need a fix for this'
+  - There is a wired problem happening with iphones where it starts up and just keep starting I saw this
+    problem happening to and then it Happened To 2 iphones with me so PLZ SOLVE THIS PROBLEM!
+  - I tried everything to fix my iPhone but it’s still restart every 2-3 minutes and I have found many
+    ppl have the same problem ... Can u fix this ASAP ? by the way I have uplated the latest version of
+    iOS
+  - I’m not even kidding my iPhone is so screwed it just went from 99% straight of charge to boiling hot
+    and 27% what is up with that ish ?
+  - my iPhone 8 Plus keeps crashing after running any app. Heard there’s a bug goin around. Anyone else
+    having this problem? 🤦‍♂️
+- cluster_id: 2
+  name: vent_about_updates
+  description: The customer is venting anger and frustration about software updates breaking or slowing
+    down their phone.
+  is_support_request: false
+  coherent: true
+  merge_with: ''
+  size: 67
+  share: 0.1117
+  examples:
+  - I am so fuxking done with you and these dumb ass updates. I literally have to have this phone for
+    another year and a half until it’s paid off and I can’t be on my phone for more than 5 minutes before
+    it glitches and completely freezes 🖕🏼🖕🏼🖕🏼🖕🏼🖕🏼🖕🏼🖕🏼🖕🏼
+  - a big FUCK YOU TO stupid ass update damn near broke my phone 🖕🏼🖕🏼🖕🏼🖕🏼
+  - My phone was fine but now that I updated it it’s been fucking up what kinda business y’all running?
+    Y’all planting viruses huh?
+  - BRUH WHAT THE FUCK FIX THIS SHIT I️ KNOW WHAT YALL TRYNA DO! NOBODY WITH A PHONE OVER A 6sPLUS IS
+    HAVING THIS PROBLEM IM NOT BUYIN IT
+  - so sick of my phone bein on bullshit after a new iPhone drop! fix it
+- cluster_id: 3
+  name: complain_update_performance
+  description: The customer is complaining about severe battery drain and freezing after updating their
+    device.
+  is_support_request: false
+  coherent: true
+  merge_with: ''
+  size: 79
+  share: 0.1317
+  examples:
+  - the new iPhone update is draining my battery like crazzzzy! Always on low power made. Still doesn’t
+    last more than a few hrs 😡😡😡
+  - This new IOS update is awful my phone constantly crashes and freezes I can barely use it.When is this
+    going to be fixed?!!?
+  - Seriously my phone hasn’t stopped freezing since I updated the softaware ahhhhh !
+  - Seriously this new iPhone update is the worst ! Drains batteries like no other. After an hr my phone
+    is dying.
+  - Each update makes my phone act worse. I’m not buying the new one. Fix it
+- cluster_id: 4
+  name: fix_autocorrect_glitch
+  description: The customer wants Apple to fix the keyboard bug that autocorrects the letter 'I' into
+    symbols.
+  is_support_request: true
+  coherent: true
+  merge_with: ''
+  size: 66
+  share: 0.11
+  examples:
+  - Wtf is doing with my letter “I️”
+  - fix the I️ glitch please
+  - Wtf is wrong with typing the letter I️
+  - come on. Fix the “I️” problem
+  - Hey can you please fix this “I️” glitch? I’m looking like an idiot when i text.
+- cluster_id: 5
+  name: complain_ios_11
+  description: The customer is expressing dissatisfaction and complaining specifically about performance
+    issues in iOS 11.
+  is_support_request: false
+  coherent: true
+  merge_with: ''
+  size: 105
+  share: 0.175
+  examples:
+  - I'm so annoyed with iOS 11 updates. My Phone keeps freezing ans shutting off randomly and the battery
+    is draining FIX IT!!
+  - iOS 11 ruined my phone I demand something be done
+  - Hey I really hate iOS 11 It’s killing my battery and my apps.
+  - 'It’s not even remotely funny how BAD #iOS11 is. Phone won’t connect, touch features lag, freezes
+    constantly, reboot 2-3x/day. FIX NOW!'
+  - iOS11 ruined my iPhone’s performance. Worst update ever.
+- cluster_id: 6
+  name: complain_hardware_reliability
+  description: The customer is complaining about recurring hardware failures and repair issues across
+    various Mac and accessory products.
+  is_support_request: false
+  coherent: false
+  merge_with: ''
+  size: 62
+  share: 0.1033
+  examples:
+  - Spent 5k on iMac. Has been to the Genius Bar 4 Times this year! Still not working! Hurting my business.
+    Over it!
+  - Dear I got a MacBook Pro 4 and a half years ago, I’ve only had to get major repairs on it 5 times
+    and don’t worry it died again today
+  - So disheartening that my Apple Watch's microphone has broken TWICE and refuses to replace it. Have
+    I done something wrong by by purchasing only products for over 20 years? I'm losing faith... 😢
+  - Hi apple support is misleading me from past 6 working days please give me your email to describe problem
+    shame on Apple
+  - This is my third charger for my MacBook Air in the last 3-4 years. Broken again. Either cut costs
+    from $99 to $49, or send me another replacement. This'd my 4th charger, paying just about $400 in
+    power cords. Sick of paying $100 for something that last a year or so.
+- cluster_id: 7
+  name: fix_autocorrect_glitch
+  description: The customer wants a fix for the keyboard bug that renders question mark box symbols while
+    typing.
+  is_support_request: true
+  coherent: true
+  merge_with: fix_autocorrect_glitch
+  size: 82
+  share: 0.1367
+  examples:
+  - WHY IS THIS HAPPENING? It’s so annoying :-(
+  - WHAT IS THIS ?????? Fix it. Yesterday.
+  - Hey -Fix this bug!!! I️ am going crazy!!!!!
+  - when tf you going to fix this question mark shit.
+  - I️ need you to fix this glitch ASAP
