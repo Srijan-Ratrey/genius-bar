@@ -108,18 +108,24 @@ def trivial(messages: list[str]) -> list[Triage]:
     ]
 
 
-def classify_by_rules(message: str) -> str:
-    """First matching rule wins; unmatched messages fall to the majority class.
+def classify_by_rules(message: str, fallback: str | None = MAJORITY_INTENT) -> str | None:
+    """First matching rule wins; unmatched messages fall back to `fallback`.
 
-    Falling back to the majority class rather than not_actionable is the
-    charitable choice for the baseline: it is what maximises its accuracy on an
-    imbalanced set, so the comparison is against the baseline at its best.
+    As a CLASSIFIER the fallback is the majority class -- the charitable choice,
+    maximising the baseline's accuracy on an imbalanced set so the comparison is
+    against the baseline at its best.
+
+    As a STRATIFICATION proxy that fallback is actively harmful: it labels every
+    unmatched message update_performance, which both inflates that stratum to
+    79% (against a true ~38%) and makes not_actionable unreachable, since no
+    message ever falls into it. Sampling therefore passes fallback=None and
+    treats "unmatched" as its own stratum.
     """
     text = clean_text(message)
     for intent, pattern in INTENT_RULES:
         if pattern.search(text):
             return intent
-    return MAJORITY_INTENT
+    return fallback
 
 
 def escalate_by_rules(message: str, intent: str | None = None) -> tuple[str, str]:
