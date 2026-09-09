@@ -249,6 +249,90 @@ def recheck(n: int) -> None:
     console.print(f"[green]recheck saved to {RECHECK.name}[/green]")
 
 
+def rate_replies(n: int = 40) -> None:
+    """Hand-rate agent drafts on the judge's own rubric.
+
+    This is what makes the judge trustworthy or not. Without human ratings to
+    correlate against, a judge score of 3.8/5 is a number with no referent.
+
+    Two things are deliberately hidden while rating:
+      - the LLM judge's scores, for the obvious reason
+      - which system produced the draft, so a known-baseline reply is not
+        marked down for being the baseline's
+
+    Rated examples are drawn from the BLIND pass first. Those labels were made
+    with no model output visible, so they are the only ones that can carry an
+    agreement claim without a contamination caveat attached.
+    """
+    from genius_bar.judge import RUBRIC
+
+    preds_path = REPO_ROOT / "reports" / "predictions.jsonl"
+    if not preds_path.exists():
+        raise SystemExit(
+            f"{preds_path.relative_to(REPO_ROOT)} not found.\n"
+            "Run `make eval` first -- rating needs drafts to rate."
+        )
+
+    rows = read_jsonl(preds_path)
+    done = {r["id"] for r in read_jsonl(REPLY_RATINGS)}
+
+    # Blind-pass examples first, and only drafts that actually exist.
+    candidates = [
+        r for r in rows
+        if r["id"] not in done and r["systems"]["agent"].get("draft", "").strip()
+    ]
+    candidates.sort(key=lambda r: 0 if r["truth"].get("pass") == "blind" else 1)
+    todo = candidates[: max(0, n - len(done))]
+
+    if not todo:
+        console.print(f"[green]{len(done)} replies already rated.[/green]")
+        return
+
+    console.print(Panel(
+        "Score each reply 1-5 on four criteria. The model's own scores are\n"
+        "hidden, and so is which system wrote the draft.\n\n"
+        + "\n".join(f"[bold]{k}[/bold]: {v.splitlines()[0]}" for k, v in RUBRIC.items())
+        + "\n\nUse the full 1-5 range. Rating everything 3 makes the correlation\n"
+          "meaningless, which defeats the point of doing this by hand.",
+        title="reply rating", border_style="green",
+    ))
+
+    for i, row in enumerate(todo, 1):
+        console.rule(f"{i}/{len(todo)}  (rated: {len(done)})")
+        agent = row["systems"]["agent"]
+        console.print(Panel(row["message"], title="customer", border_style="cyan"))
+        console.print(Panel(agent["draft"], title="proposed reply", border_style="yellow"))
+        for j, e in enumerate(agent.get("evidence", [])[:3], 1):
+            console.print(f"  precedent {j}: [dim]{e['reply'][:140]}[/dim]")
+
+        scores: dict[str, int] = {}
+        quit_now = False
+        for criterion in RUBRIC:
+            while True:
+                raw = console.input(f"  {criterion} [1-5] (q=save+quit): ").strip().lower()
+                if raw == "q":
+                    quit_now = True
+                    break
+                if raw.isdigit() and 1 <= int(raw) <= 5:
+                    scores[criterion] = int(raw)
+                    break
+                console.print("  [red]1-5 please[/red]")
+            if quit_now:
+                break
+        if quit_now:
+            console.print(f"\n[yellow]saved. {len(done)} rated.[/yellow]")
+            return
+
+        append_jsonl(REPLY_RATINGS, {
+            "id": row["id"],
+            **scores,
+            "mean": sum(scores.values()) / len(scores),
+        })
+        done.add(row["id"])
+
+    console.print(f"[green]done: {len(done)} replies rated.[/green]")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["intent", "recheck", "reply"], default="intent")
@@ -261,10 +345,7 @@ def main() -> None:
     elif args.mode == "recheck":
         recheck(args.n)
     else:
-        raise SystemExit(
-            "reply-rating mode is not available yet: it needs drafts to rate.\n"
-            "Run the eval harness first (milestone 10), then come back to this."
-        )
+        rate_replies(args.n)
 
 
 if __name__ == "__main__":
