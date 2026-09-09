@@ -454,3 +454,79 @@ def test_report_rows_match_header_width_when_a_system_is_unjudged():
         if line.startswith(("| trivial |", "| agent |")) and "%" in line:
             assert line.count("|") == width, f"row width {line.count('|')} != {width}: {line}"
     assert "| |" not in md, "empty cell from a desynchronised row"
+
+
+def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
+    """Smoke-test the whole harness with everything mocked.
+
+    Worth its length: without it, a wiring bug in eval.main would only surface
+    after someone spends two hours hand-labelling. Runs no API calls and
+    touches no real data file.
+    """
+    import sys
+
+    from genius_bar import agent, eval as ev, judge as judge_mod
+
+    golden = tmp_path / "golden.jsonl"
+    golden.write_text("\n".join(json.dumps(r) for r in [
+        {"id": 1, "message": "battery drains since the update", "intent": "update_performance",
+         "should_escalate": False, "pass": "blind", "proxy_intent": "update_performance",
+         "weight": 12.0, "hard_cases": []},
+        {"id": 2, "message": "unauthorized charges on my itunes account", "intent": "account_billing",
+         "should_escalate": True, "pass": "blind", "proxy_intent": "account_billing",
+         "weight": 1.5, "hard_cases": []},
+        {"id": 3, "message": "all my contacts vanished", "intent": "data_loss",
+         "should_escalate": True, "pass": "assisted", "proxy_intent": "data_loss",
+         "weight": 1.8, "hard_cases": ["very_short"]},
+    ]))
+
+    class FakeRetriever:
+        corpus = {"reply_clean": []}
+
+        def __len__(self):
+            return 0
+
+        def search(self, q, k=5):
+            return [{"customer": "battery dies", "reply": "Which iOS version?", "score": 0.42}]
+
+    monkeypatch.setattr(ev, "GOLDEN", golden)
+    monkeypatch.setattr(ev, "REPORTS", tmp_path / "reports")
+    monkeypatch.setattr(ev, "REPLY_RATINGS", tmp_path / "none.jsonl")
+    monkeypatch.setattr(ev, "RECHECK", tmp_path / "none2.jsonl")
+    monkeypatch.setattr(ev, "Retriever", lambda *a, **k: FakeRetriever())
+
+    # No API: fixed classifications, drafts and judge scores.
+    monkeypatch.setattr(agent, "classify", lambda msgs, **kw: [
+        {"intent": "update_performance", "confidence": 0.95, "signals": []},
+        {"intent": "account_billing", "confidence": 0.9, "signals": ["payment_dispute"]},
+        {"intent": "data_loss", "confidence": 0.8, "signals": []},
+    ][: len(msgs)])
+    monkeypatch.setattr(agent, "draft", lambda items, **kw: [
+        {"draft": "Which iOS version are you on?", "used_evidence": [1]} for _ in items
+    ])
+    monkeypatch.setattr(judge_mod, "judge_replies", lambda items, **kw: [
+        ({k: 4 for k in judge_mod.RUBRIC} | {"mean": 4.0, "worst_problem": "terse"})
+        if it.get("draft", "").strip() else None
+        for it in items
+    ])
+    monkeypatch.setattr(sys, "argv", ["eval", "--cross-family", "0"])
+
+    ev.main()
+
+    results = json.loads((tmp_path / "reports" / "results.json").read_text())
+    assert set(results["systems"]) == {"trivial", "simple", "agent"}
+    assert results["n"] == 3
+
+    # The agent must escalate both high-risk cases and auto-handle the routine one.
+    preds = [json.loads(l) for l in
+             (tmp_path / "reports" / "predictions.jsonl").read_text().splitlines()]
+    actions = {p["id"]: p["systems"]["agent"]["action"] for p in preds}
+    assert actions == {1: "auto", 2: "escalate", 3: "escalate"}
+
+    # Escalation recall must be perfect here, and reported both ways.
+    esc = results["systems"]["agent"]["escalation"]
+    assert esc["balanced"]["recall"] == 1.0
+    assert "weighted" in esc and "cost_sweep" in esc
+
+    md = (tmp_path / "reports" / "results.md").read_text()
+    assert "Intent classification" in md and "Escalation" in md
