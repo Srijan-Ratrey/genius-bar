@@ -31,14 +31,30 @@ COST_MISSED_ESCALATION = 10.0
 COST_NEEDLESS_ESCALATION = 1.0
 
 
-def intent_metrics(y_true: list[str], y_pred: list[str]) -> dict:
-    """Accuracy plus macro-F1 and per-class F1. Labels come from the union of both."""
+def intent_metrics(
+    y_true: list[str], y_pred: list[str], sample_weight: list[float] | None = None
+) -> dict:
+    """Accuracy plus macro-F1 and per-class F1. Labels come from the union of both.
+
+    `sample_weight` recovers production-distribution numbers from a balanced
+    golden set. The golden set deliberately over-samples rare classes, so the
+    unweighted accuracy describes a distribution no real traffic has; passing
+    the sampling weights back gives the number production would actually see.
+    Both are reported, and the gap between them is a headline caveat.
+    """
     labels = sorted(set(y_true) | set(y_pred))
-    per_class = f1_score(y_true, y_pred, labels=labels, average=None, zero_division=0)
+    per_class = f1_score(
+        y_true, y_pred, labels=labels, average=None, zero_division=0,
+        sample_weight=sample_weight,
+    )
+    correct = np.array([t == p for t, p in zip(y_true, y_pred)], dtype=float)
     return {
         "n": len(y_true),
-        "accuracy": float(np.mean([t == p for t, p in zip(y_true, y_pred)])),
-        "macro_f1": float(f1_score(y_true, y_pred, labels=labels, average="macro", zero_division=0)),
+        "accuracy": float(np.average(correct, weights=sample_weight)),
+        "macro_f1": float(f1_score(
+            y_true, y_pred, labels=labels, average="macro", zero_division=0,
+            sample_weight=sample_weight,
+        )),
         "per_class_f1": {lab: float(s) for lab, s in zip(labels, per_class)},
         "labels": labels,
         "confusion": confusion_matrix(y_true, y_pred, labels=labels).tolist(),
@@ -50,6 +66,7 @@ def escalation_metrics(
     y_pred: list[bool],
     cost_missed: float = COST_MISSED_ESCALATION,
     cost_needless: float = COST_NEEDLESS_ESCALATION,
+    sample_weight: list[float] | None = None,
 ) -> dict:
     """Precision/recall on "should escalate", plus a cost-weighted error rate.
 
@@ -63,7 +80,7 @@ def escalation_metrics(
     needless = int((~t & p).sum())    # could have auto-handled, escalated anyway
 
     precision, recall, f1, _ = precision_recall_fscore_support(
-        t, p, average="binary", zero_division=0
+        t, p, average="binary", zero_division=0, sample_weight=sample_weight
     )
     total_cost = missed * cost_missed + needless * cost_needless
     return {
@@ -79,7 +96,7 @@ def escalation_metrics(
     }
 
 
-def agreement(human: list[float], judge: list[float], ordinal: bool = True) -> dict:
+def agreement(human: list[float], judge: list[float]) -> dict:
     """How well the LLM-judge tracks the human ratings.
 
     Reports both a chance-corrected exact-match (weighted kappa) and a rank
@@ -110,13 +127,10 @@ def agreement(human: list[float], judge: list[float], ordinal: bool = True) -> d
         out["spearman"] = None
         out["spearman_p"] = None
 
-    if ordinal:
-        # Quadratic weights: being 3 points off is much worse than 1 point off.
-        out["kappa_quadratic"] = float(
-            cohen_kappa_score(h.round().astype(int), j.round().astype(int), weights="quadratic")
-        )
-    else:
-        out["kappa"] = float(cohen_kappa_score(h, j))
+    # Quadratic weights: being 3 points off is much worse than 1 point off.
+    out["kappa_quadratic"] = float(
+        cohen_kappa_score(h.round().astype(int), j.round().astype(int), weights="quadratic")
+    )
     return out
 
 

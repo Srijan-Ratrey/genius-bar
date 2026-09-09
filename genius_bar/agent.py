@@ -109,10 +109,6 @@ def load_intents() -> dict[str, dict]:
     return {e["name"]: e for e in entries}
 
 
-def intent_names() -> list[str]:
-    return list(load_intents())
-
-
 # --- step 1: classify + read risk signals ----------------------------------
 
 
@@ -161,7 +157,7 @@ def classify(messages: list[str], batch_size: int = 8, model: str = llm.PRIMARY)
         batch_size=batch_size,
         model=model,
     )
-    valid = set(intent_names())
+    valid = set(load_intents())
     out = []
     for item in raw:
         if not item:

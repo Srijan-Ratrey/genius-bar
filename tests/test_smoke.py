@@ -415,3 +415,42 @@ def test_jsonl_round_trip_appends(tmp_path):
     rows = label.read_jsonl(path)
     assert [r["id"] for r in rows] == [1, 2]
     assert label.read_jsonl(tmp_path / "missing.jsonl") == []
+
+
+# --- report rendering ------------------------------------------------------
+
+from genius_bar import eval as ev  # noqa: E402
+from genius_bar import judge as judge_mod  # noqa: E402
+
+
+def test_report_rows_match_header_width_when_a_system_is_unjudged():
+    """The trivial baseline can be unjudged; its row must still line up.
+
+    A row with the wrong number of cells does not raise -- markdown just
+    renders a silently wrong table, which is the worst failure mode for a
+    file whose whole purpose is reporting numbers honestly.
+    """
+    def block(judged):
+        scores = {k: (3.5 if judged else None) for k in [*judge_mod.RUBRIC, "mean"]}
+        return {
+            "intent": {"balanced": {"accuracy": 0.5, "macro_f1": 0.4},
+                       "weighted": {"accuracy": 0.5}},
+            "escalation": {"balanced": {"precision": 0.5, "recall": 0.5,
+                                        "missed_escalations": 1,
+                                        "needless_escalations": 2,
+                                        "cost_per_100": 10.0},
+                           "cost_sweep": {"3:1": 1.0, "10:1": 2.0, "30:1": 3.0}},
+            "reply": {"n_drafted": 5, "ungrounded_rate": 0.1, "over_limit": 0, **scores},
+        }
+
+    md = ev.build_report({
+        "n": 10, "n_blind": 5, "n_assisted": 5,
+        "systems": {"trivial": block(False), "agent": block(True)},
+    })
+
+    header = next(l for l in md.splitlines() if l.startswith("| system | grounded"))
+    width = header.count("|")
+    for line in md.splitlines():
+        if line.startswith(("| trivial |", "| agent |")) and "%" in line:
+            assert line.count("|") == width, f"row width {line.count('|')} != {width}: {line}"
+    assert "| |" not in md, "empty cell from a desynchronised row"
