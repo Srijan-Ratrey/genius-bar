@@ -93,3 +93,68 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
 16. **Stratified sampling, over-sampling hard cases.** Reported accuracy
     therefore does *not* reflect production distribution. Disclosed in the
     misleading-number section rather than buried.
+
+## Model selection (all probed against the live API, not assumed)
+
+17. **`gemini-2.5-flash` is retired for new API keys.** It returns 404 with a
+    pointer to newer models. Worth recording because every tutorial and most
+    training data still names it, so the obvious first choice is now a dead end.
+
+18. **Pinned `gemini-3.7-flash`, not `gemini-flash-latest`.** *load-bearing.*
+    An alias would silently change model behind a committed response cache,
+    which would make the cached numbers unreproducible *and* wrong in a way
+    nobody would notice. `gemini-3.8-flash` was the newer option but returned
+    503 "high demand" on every attempt, so it was rejected as unreliable.
+
+19. **Cross-family judge is `gemma-4-31b-it`.** *load-bearing.* Judge and
+    generator both being Gemini means self-enhancement bias, which is a headline
+    caveat rather than a footnote. Gemma is a different model family on the same
+    API, so judge/judge agreement there is much weaker evidence of *shared*
+    bias. Gemini pro would have been the stronger judge but returns 429 on the
+    free tier -- an availability constraint, not a quality judgement.
+
+20. **Gemma needs fence-stripping.** It ignores `response_mime_type` and wraps
+    output in ```json fences even with a schema attached, so JSON parsing falls
+    back to stripping them. It also rejects `thinking_config` outright, as does
+    `gemini-3.5-flash-lite`, hence the `NO_THINKING_CONFIG` set.
+
+21. **`gemini-embedding-001`, not `gemini-embedding-2`.** The newer model
+    returns exactly *one* vector regardless of how many texts you pass, so it
+    cannot be batched -- embedding the corpus one text at a time would exhaust
+    the daily quota by itself. Caught by an assertion comparing input and output
+    counts, which is the only reason it was noticed at all.
+
+22. **Embeddings truncated to 768 dims from 3072 (Matryoshka).** Measured on
+    support text before committing to it: paraphrase similarity 0.765 vs 0.767
+    at full width, with every relative ordering preserved, for a quarter of the
+    storage. 3072 dims would have made the committed cache ~74MB.
+
+23. **Embed batch size 50, not the documented 100.** 100 returns 429 for
+    tweet-length input while 50 succeeds reliably. `_embed_live` halves the
+    batch and retries on 429 rather than hard-coding a size that will be wrong
+    for a different corpus.
+
+24. **Embeddings cached per text, not per batch.** A per-batch cache key would
+    be invalidated by any reordering or resampling of the corpus, re-spending
+    the entire embedding budget. Per-text means only genuinely new text costs a
+    request.
+
+25. **Python pinned to 3.12 via `.python-version`.** uv resolved to 3.14 by
+    default, which worked, but graders should run what was actually tested.
+
+## What the data turned out to look like
+
+26. **Sample is 15,000 of 80,702 AppleSupport threads, drawn at random with no
+    stratification.** The first attempt at 4,000 was raised after checking the
+    grounding material available. The subsample's turn distribution matches the
+    population (median 2 turns, 24.8% with >=4 turns vs 24.9% overall), so
+    there is no sampling bias to explain away.
+
+27. **53% of AppleSupport's *first* replies are DM deflections.**
+    *load-bearing.* Half the corpus contains no public resolution to ground a
+    reply in. This is the single most important fact about this brand and it
+    directly limits what "grounded reply" can honestly mean here.
+
+28. **Median thread is 2 turns.** Only 24.8% reach 4 turns. The headline "106k
+    Apple tweets" badly oversells the amount of usable resolution material;
+    the real figure is thousands of threads, not tens of thousands.

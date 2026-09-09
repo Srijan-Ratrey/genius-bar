@@ -92,6 +92,9 @@ from genius_bar import llm  # noqa: E402
 @pytest.fixture
 def isolated_cache(tmp_path, monkeypatch):
     monkeypatch.setattr(llm, "LLM_CACHE", tmp_path / "llm")
+    # REPO_ROOT too: _get_client calls load_dotenv(REPO_ROOT/".env"), which would
+    # otherwise reload the real key and make this test issue a live request.
+    monkeypatch.setattr(llm, "REPO_ROOT", tmp_path)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.setattr(llm, "_client", None)
     monkeypatch.setattr(llm, "MIN_INTERVAL", 0.0)
@@ -106,7 +109,7 @@ def test_cache_miss_without_key_is_explicit(isolated_cache):
 
 def test_cached_prompt_replays_without_key(isolated_cache):
     schema = {"type": "object", "properties": {"intent": {"type": "string"}}}
-    key = {"model": llm.FLASH, "prompt": "hello", "schema": schema, "thinking": 0}
+    key = {"model": llm.PRIMARY, "prompt": "hello", "schema": schema, "thinking": 0}
 
     isolated_cache.mkdir(parents=True)
     llm._cache_path(isolated_cache, key).write_text(
