@@ -348,3 +348,40 @@ def test_ungrounded_support_draft_is_downgraded_to_escalate(monkeypatch):
     assert support.action == "escalate" and "not grounded" in support.reason
     assert venting.action == "auto", "not_actionable needs no precedent to cite"
     assert support.grounded is False
+
+
+# --- baselines -------------------------------------------------------------
+
+from genius_bar import baselines  # noqa: E402
+
+
+def test_trivial_baseline_never_escalates_and_is_one_reply():
+    out = baselines.trivial(["battery dead", "unauthorized charge", "boiling hot"])
+    assert {t.action for t in out} == {"auto"}, "trivial baseline must never escalate"
+    assert len({t.draft for t in out}) == 1, "trivial baseline sends one canned reply"
+    assert len({t.intent for t in out}) == 1
+
+
+def test_baseline_rules_are_ordered_specific_before_catch_all():
+    """update_performance keywords appear inside other intents' messages.
+
+    "all my contacts are gone after updating" contains "updating"; if the
+    catch-all ran first it would swallow the data_loss case.
+    """
+    assert baselines.classify_by_rules("all my contacts are gone after updating") == "data_loss"
+    assert baselines.classify_by_rules("refund my iTunes charge from the update") == "account_billing"
+
+
+def test_baseline_escalates_high_risk_intents_too():
+    """Kept comparable to the agent, so escalation metrics measure signal quality."""
+    action, reason = baselines.escalate_by_rules("been to the genius bar 4 times", "hardware_repair")
+    assert action == "escalate" and "high-risk" in reason
+
+
+def test_simple_baseline_copies_verbatim_and_does_not_synthesise():
+    class FakeRetriever:
+        def search(self, q, k=5):
+            return [{"customer": "c", "reply": "EXACT HISTORICAL REPLY", "score": 0.7}]
+
+    out = baselines.simple(["my battery drains fast"], FakeRetriever())
+    assert out[0].draft == "EXACT HISTORICAL REPLY", "the control must not paraphrase"
