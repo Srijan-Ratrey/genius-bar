@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from genius_bar import judge as judge_mod
@@ -31,6 +32,12 @@ from genius_bar.agent import Triage, load_intents, triage
 from genius_bar.baselines import simple, trivial
 from genius_bar.data import REPO_ROOT
 from genius_bar.retrieve import Retriever
+
+def _rel(path: Path) -> str:
+    """Path relative to the repo for display. relative_to() raises when the
+    path sits outside REPO_ROOT; relpath never does."""
+    return os.path.relpath(path, REPO_ROOT)
+
 
 GOLDEN = REPO_ROOT / "data" / "golden.jsonl"
 RECHECK = REPO_ROOT / "data" / "golden_recheck.jsonl"
@@ -41,10 +48,13 @@ REPORTS = REPO_ROOT / "reports"
 COST_RATIOS = [3.0, 10.0, 30.0]
 
 
-def load_golden(path: Path = GOLDEN) -> list[dict]:
+def load_golden(path: Path | None = None) -> list[dict]:
+    # Resolved at call time, not bound as a default: a default argument captures
+    # the module constant at import, so the path could not be overridden.
+    path = path or GOLDEN
     if not path.exists():
         raise SystemExit(
-            f"{path.relative_to(REPO_ROOT)} not found.\n"
+            f"{_rel(path)} not found.\n"
             "The golden set is hand-labelled and cannot be generated. Run:\n"
             "  uv run python scripts/sample_golden.py    # once, to draw 180\n"
             "  uv run python -m genius_bar.label         # to label them"
@@ -333,7 +343,7 @@ def main() -> None:
             }, ensure_ascii=False) + "\n")
 
     print("\n" + build_report(results))
-    print(f"wrote {REPORTS.relative_to(REPO_ROOT)}/results.{{json,md}} and predictions.jsonl")
+    print(f"wrote {_rel(REPORTS)}/results.{{json,md}} and predictions.jsonl")
 
 
 if __name__ == "__main__":
