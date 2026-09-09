@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 import numpy as np
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception, stop_after_attempt
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = REPO_ROOT / "cache"
@@ -55,16 +55,21 @@ EMBED_MODEL = "gemini-embedding-001"
 # similarity 0.765 vs 0.767 at full width, with all relative orderings intact,
 # for 1/4 the storage.
 EMBED_DIM = 768
-# 100 is the documented ceiling but returns 429 for tweet-length input; 50 is
-# the largest size that reliably succeeds.
-EMBED_BATCH = 50
+# The quota counts each TEXT as one request, not each batch, so batch size
+# buys latency and nothing else. 100 texts per call lands exactly on the
+# 100-per-minute cap, hence 80. The binding limit is 1000 texts per DAY, which
+# is why retrieval uses TF-IDF and embeddings are reserved for offline
+# clustering -- see DECISIONS.md.
+EMBED_BATCH = 80
 
 # Models that reject a thinking_config outright.
 NO_THINKING_CONFIG = {"gemma-4-31b-it", "gemini-3.5-flash-lite"}
 
 # Spacing between live calls, to stay under the per-minute cap. Only applies on
-# cache misses, so a cached replay is unaffected.
+# cache misses, so a cached replay is unaffected. Embeddings get their own
+# figure because their quota (100 req/min) is far looser than generation's.
 MIN_INTERVAL = float(os.getenv("GEMINI_MIN_INTERVAL", "4.0"))
+EMBED_MIN_INTERVAL = float(os.getenv("GEMINI_EMBED_MIN_INTERVAL", "1.0"))
 
 _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$")
 
@@ -91,7 +96,8 @@ class _Budget:
     def spend(self, kind: str = "llm", texts: int = 0) -> None:
         """Record a live request, sleeping first to respect the per-minute cap."""
         with self._lock:
-            wait = MIN_INTERVAL - (time.monotonic() - self._last_call)
+            floor = EMBED_MIN_INTERVAL if kind == "embed" else MIN_INTERVAL
+            wait = floor - (time.monotonic() - self._last_call)
             if wait > 0:
                 time.sleep(wait)
             self._last_call = time.monotonic()
@@ -138,14 +144,52 @@ def _get_client():
             )
         from google import genai
 
-        _client = genai.Client(api_key=key)
+        # attempts=1 disables the SDK's internal 429 retry. Left on, it retries
+        # underneath this module -- so the backoff here never sees the first
+        # failures, the budget counter under-reports, and two independent
+        # backoffs compound into a request storm against a per-minute quota.
+        _client = genai.Client(
+            api_key=key, http_options={"retry_options": {"attempts": 1}}
+        )
     return _client
 
 
-def _is_transient(exc: BaseException) -> bool:
-    """429 and 5xx are worth retrying; a malformed request never is."""
+_RETRY_DELAY = re.compile(r"retryDelay['\"]?:\s*['\"]?(\d+(?:\.\d+)?)")
+
+
+def _is_rate_limit(exc: BaseException) -> bool:
     text = f"{type(exc).__name__}: {exc}"
-    return any(m in text for m in ("429", "RESOURCE_EXHAUSTED", "500", "503", "UNAVAILABLE"))
+    return "429" in text or "RESOURCE_EXHAUSTED" in text
+
+
+def _is_transient(exc: BaseException) -> bool:
+    """Rate limits and 5xx are worth retrying; a malformed request never is."""
+    text = f"{type(exc).__name__}: {exc}"
+    return _is_rate_limit(exc) or any(m in text for m in ("500", "503", "UNAVAILABLE"))
+
+
+def _is_too_large(exc: BaseException) -> bool:
+    """A genuine payload-size rejection, which splitting the batch does fix."""
+    text = f"{type(exc).__name__}: {exc}"
+    return "400" in text and ("at most" in text or "too large" in text or "exceeds" in text)
+
+
+def _retry_after(exc: BaseException, default: float = 30.0) -> float:
+    """Seconds to wait, taken from the server's own retryDelay when it gives one.
+
+    Guessing here is how you get throttled harder: the quota is a rolling
+    per-minute window, so waiting the stated time drains it, while retrying
+    sooner just refills it.
+    """
+    match = _RETRY_DELAY.search(str(exc))
+    return float(match.group(1)) + 2.0 if match else default
+
+
+def _wait_from_error(retry_state) -> float:
+    exc = retry_state.outcome.exception() if retry_state.outcome else None
+    if exc is not None and _is_rate_limit(exc):
+        return _retry_after(exc)
+    return min(8.0 * (2 ** (retry_state.attempt_number - 1)), 120.0)
 
 
 def _cache_path(root: Path, key: dict[str, Any]) -> Path:
@@ -167,8 +211,8 @@ def _parse_json(raw: str) -> Any:
 
 @retry(
     retry=retry_if_exception(_is_transient),
-    wait=wait_exponential(multiplier=8, min=8, max=240),
-    stop=stop_after_attempt(5),
+    wait=_wait_from_error,
+    stop=stop_after_attempt(6),
     reraise=True,
 )
 def _call_gemini(prompt: str, model: str, schema: dict | None, thinking: int | None) -> str:
@@ -261,12 +305,16 @@ def _embed_store(model: str, dim: int) -> Path:
     return EMBED_CACHE / f"{model}-{dim}.npz"
 
 
-def _embed_live(texts: list[str], model: str, dim: int) -> list[np.ndarray]:
-    """Embed a batch, halving on 429 rather than giving up.
+def _embed_live(
+    texts: list[str], model: str, dim: int, attempt: int = 0
+) -> list[np.ndarray]:
+    """Embed one batch, waiting out rate limits and splitting only on size errors.
 
-    The documented batch ceiling is 100 but tweet-length input 429s well below
-    that, and the real limit moves with input length. Splitting adapts instead
-    of hard-coding a size that will be wrong for some corpus.
+    The distinction matters and cost a wasted run to learn. Splitting a batch
+    that was refused for *rate* turns one queued request into two immediate
+    ones, which is precisely the wrong move against a per-minute quota -- it
+    accelerates into the limit and each half then splits again. Splitting is the
+    right fix only for a genuine payload-size rejection.
     """
     client = _get_client()
     try:
@@ -278,12 +326,41 @@ def _embed_live(texts: list[str], model: str, dim: int) -> list[np.ndarray]:
         if len(got) != len(texts):
             raise RuntimeError(f"asked for {len(texts)} embeddings, got {len(got)}")
         return got
+
     except Exception as exc:
-        if len(texts) > 1 and _is_transient(exc):
+        if _is_rate_limit(exc) and attempt < 6:
+            delay = _retry_after(exc)
+            print(
+                f"[embed] rate limited on {len(texts)} texts; waiting {delay:.0f}s "
+                f"(attempt {attempt + 1})",
+                file=sys.stderr,
+            )
+            time.sleep(delay)
+            return _embed_live(texts, model, dim, attempt + 1)
+
+        if _is_too_large(exc) and len(texts) > 1:
             mid = len(texts) // 2
-            print(f"[embed] batch of {len(texts)} rejected; splitting", file=sys.stderr)
+            print(f"[embed] batch of {len(texts)} too large; splitting", file=sys.stderr)
             return _embed_live(texts[:mid], model, dim) + _embed_live(texts[mid:], model, dim)
+
         raise
+
+
+def cached_subset(
+    texts: Sequence[str], model: str = EMBED_MODEL, dim: int = EMBED_DIM
+) -> list[str]:
+    """The subset of `texts` already embedded, in input order.
+
+    The free tier allows 1000 embedded texts per *day* (each text counts as one
+    request, not each batch), so a caller that would otherwise exceed the quota
+    can work with whatever is already paid for instead of stalling for a day.
+    """
+    store_path = _embed_store(model, dim)
+    if not store_path.exists():
+        return []
+    with np.load(store_path) as z:
+        have = set(z.files)
+    return [t for t in texts if hashlib.sha256(t.encode()).hexdigest()[:24] in have]
 
 
 def embed(
@@ -308,13 +385,16 @@ def embed(
 
     if missing:
         by_key = dict(zip(keys, texts))
-        for start in range(0, len(missing), EMBED_BATCH):
-            chunk = missing[start : start + EMBED_BATCH]
-            for k, vec in zip(chunk, _embed_live([by_key[k] for k in chunk], model, dim)):
-                store[k] = vec
-
         EMBED_CACHE.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(store_path, **store)
+        try:
+            for start in range(0, len(missing), EMBED_BATCH):
+                chunk = missing[start : start + EMBED_BATCH]
+                for k, vec in zip(chunk, _embed_live([by_key[k] for k in chunk], model, dim)):
+                    store[k] = vec
+        finally:
+            # Flush even on failure: these vectors cost quota, and a crash
+            # partway through a large corpus should not throw them away.
+            np.savez_compressed(store_path, **store)
     else:
         BUDGET.hit(len(keys))
 

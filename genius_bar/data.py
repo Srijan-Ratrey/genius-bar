@@ -8,6 +8,7 @@ touches it; everything downstream reads the committed parquet subsample via
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -135,6 +136,53 @@ def build_brand_threads(
 
     cols = ["thread_id", "turn", "tweet_id", "author_id", "inbound", "created_at", "text"]
     return df[cols]
+
+
+# Apple is addressed both by handle and by the dump's anonymised numeric id.
+_MENTION = re.compile(r"@\w+")
+_URL = re.compile(r"https?://\S+")
+_WS = re.compile(r"\s+")
+
+
+def clean_text(text: str) -> str:
+    """Strip handles and links, keeping everything that carries intent.
+
+    Emoji, punctuation and casing are deliberately preserved: "WHY IS THIS
+    BROKEN 😡" and "why is this broken" are the same intent but very different
+    escalation signals, and flattening them would throw that away.
+
+    Handles go because @AppleSupport and its numeric alias @115858 appear in
+    most messages and carry no intent -- left in, they dominate TF-IDF.
+    """
+    text = _URL.sub(" ", text)
+    text = _MENTION.sub(" ", text)
+    return _WS.sub(" ", text).strip()
+
+
+def first_inbound(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per thread: the opening customer message.
+
+    This is the classifier's real input -- at prediction time a first-touch
+    message is all you have. Evaluating on mid-thread messages would leak the
+    agent's own earlier replies and inflate every number.
+    """
+    inbound = df[df["inbound"]].sort_values(["thread_id", "turn"])
+    first = inbound.groupby("thread_id", as_index=False).first()
+    first["clean"] = first["text"].map(clean_text)
+    return first[first["clean"].str.len() > 0].reset_index(drop=True)
+
+
+def agent_replies(df: pd.DataFrame) -> pd.DataFrame:
+    """Brand replies with the customer message each one answers, for grounding."""
+    df = df.sort_values(["thread_id", "turn"])
+    prev_text = df.groupby("thread_id")["text"].shift(1)
+    prev_inbound = df.groupby("thread_id")["inbound"].shift(1)
+
+    replies = df[(df["author_id"] == BRAND) & prev_inbound.fillna(False)].copy()
+    replies["customer_text"] = prev_text[replies.index]
+    replies["customer_clean"] = replies["customer_text"].map(clean_text)
+    replies["reply_clean"] = replies["text"].map(clean_text)
+    return replies.reset_index(drop=True)
 
 
 def load_threads(path: Path = THREADS_PARQUET) -> pd.DataFrame:

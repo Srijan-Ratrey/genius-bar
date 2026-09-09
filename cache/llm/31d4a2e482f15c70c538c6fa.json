@@ -1,0 +1,158 @@
+{
+  "model": "gemini-3.7-flash",
+  "prompt": "These are clusters of opening messages customers sent to Apple's\nsupport account on Twitter. Each cluster is a group of semantically similar\nmessages, with the examples closest to the cluster centre shown.\n\nName each cluster as a customer-support intent.\n\nRules:\n- name: snake_case, 1-3 words, describing what the CUSTOMER WANTS, not the\n  device or feature involved. Prefer \"battery_drain\" over \"iphone_problem\".\n- is_support_request: false for venting, jokes, insults, feature requests and\n  general commentary with no answerable request. These are common here and are\n  a legitimate category, not noise to be forced into a support intent.\n- coherent: false if the examples plainly do not share one intent. Say so\n  rather than inventing a label that papers over a mixed cluster.\n- merge_with: if two clusters are the same intent, name the other one. Else \"\".\n\nReturn one object per cluster, in cluster_id order.\n\n  cluster 0 (24 messages):\n    - so when r y’all gonna fix this bullshit w the letter i\n    - Highkey are they ever gonna fix the I️ issue. It’s pissing me off now.\n    - GET THIS KEYBOARD SHIT TOGETHER !!!!! I can’t type I without I️t doing crazy stuff\n    - ITS REALLY ANNOYING EVERY TIME I️ TYPE “I️” I️ get “A w/ the ?” ....... 👿👿👿👿\n    - I’m sick of typing I️ and a stupid box with an A pops up. Why is that even a thing?!🙃\n    - Seriously why the fuck haven’t y’all fixed this “I️” thing STEVE IS TURNING OVER IN HIS GRAAAAAVE\n    - HOW DO I️ FUCKING FIX THIS BOX SHIT WHEN I️ TYPE THE LETTER “I” ITS PISSING ME OFF FIX THIS\n    - really must have something against the capital “I️” First, it was their naming convention, now, this stupid #iPhone glitch. #StopIt\n\n  cluster 1 (31 messages):\n    - hey why does my phone do this when I️ write the letter (i)?\n    - what’s up with the letter “I️” giving out these weird symbols when I’m texting\n    - why when I️ type the letter i do these random symbols pop up. telling stories is hard when I️ have hieroglyphics in my texts\n    - why has my phone stopped recognizing the letter I️ by itself on my phone?\n    - Can anyone tell me why this is happening? Everytime I️ type “i” this happens and autocorrects\n    - Wtf is doing with my letter “I️”\n    - Hey why is this symbol I️ popping up when I️ use the letter I️\n    - help my phone started changing the letter “i️” into this and i️ don’t know what to do please save me\n\n  cluster 2 (80 messages):\n    - I'm so annoyed with iOS 11 updates. My Phone keeps freezing ans shutting off randomly and the battery is draining FIX IT!!\n    - Hey I really hate iOS 11 It’s killing my battery and my apps.\n    - iOS11 ruined my iPhone’s performance. Worst update ever.\n    - It’s not even remotely funny how BAD #iOS11 is. Phone won’t connect, touch features lag, freezes constantly, reboot 2-3x/day. FIX NOW!\n    - iOS 11 ruined my phone I demand something be done\n    - IOS 11 is horrible can you say S. L. O. W?? Don’t tell me I have an old phone bc I don’t.\n    - iOS 11 has really done a number on my phone battery 86% at 630 AM now 6% at 830AM what gives #fail #upgradefail\n    - ever since I updated my phone to iOS 11, I can’t even use it without it glitching and freezing. Why ???? 🙄\n\n  cluster 3 (17 messages):\n    - when tf you going to fix this question mark shit.\n    - wtf happening with these damn question marks\n    - someone fix these damn question mark things that keep showing up\n    - I guess y’all forgot about fixing these boxes with the question marks huh? 🤬🤬🤬\n    - Im so tired of seeing the number sign &amp; question mark plz fix this shit\n    - The ? Mark and box still shows up even after i did the update. WTH\n    - Okay the question mark still comes out lol wtf\n    - What’s up with the question marks?\n\n  cluster 4 (69 messages):\n    - There is a wired problem happening with iphones where it starts up and just keep starting I saw this problem happening to and then it Happened To 2 iphones with me so PLZ SOLVE THIS PROBLEM!\n    - I tried everything to fix my iPhone but it’s still restart every 2-3 minutes and I have found many ppl have the same problem ... Can u fix this ASAP ? by the way I have uplated the latest version of iOS\n    - my iPhone is in the fritz please help me fix it! It randomly kicks me out of whatever app I’m on to this black loading screen then kicks me to my lock screen\n    - Updated this iPhone &amp; it keeps on freezing and switching off what’s the script\n    - PLEASE fix this random shouting down on IPhone 7+ now lasted IOS installed😡😡\n    - Is anyone else having iPhone dramas? Black screen appearing every minute or so...\n    - My iPhone keeps crashing and restarting like every minute sometimes less than a minute, anyone else?\n    - my iPhone 8 Plus keeps crashing after running any app. Heard there’s a bug goin around. Anyone else having this problem? 🤦‍♂️\n\n  cluster 5 (61 messages):\n    - Spent 5k on iMac. Has been to the Genius Bar 4 Times this year! Still not working! Hurting my business. Over it!\n    - Dear I got a MacBook Pro 4 and a half years ago, I’ve only had to get major repairs on it 5 times and don’t worry it died again today\n    - So disheartening that my Apple Watch's microphone has broken TWICE and refuses to replace it. Have I done something wrong by by purchasing only products for over 20 years? I'm losing faith... 😢\n    - The iPhone 8 Plus has WiFi issues. After 3 replacements, &amp; multiple escalations, the issue persists across backups &amp; clean setup. Now the last rep had no knowledge of the case, provided insufficient support, &amp\n    - This is my third charger for my MacBook Air in the last 3-4 years. Broken again. Either cut costs from $99 to $49, or send me another replacement. This'd my 4th charger, paying just about $400 in power cords. Sick of pay\n    - So the home button on my brand new iPhone 8 plus stopped working! Great! No Apple store close to me has availability to help me until Monday of next week! WOW! Now I get to spend the holiday break out of town with no fun\n    - Dear This is the umpteenth time my Macbook Air is letting me down. First the entire topcase and now the entire row of function keys. Got my topcase replaced last time. Now what?! And it takes ages to get the lap fixed. N\n    - Hi apple support is misleading me from past 6 working days please give me your email to describe problem shame on Apple\n\n  cluster 6 (33 messages):\n    - the new iPhone update is draining my battery like crazzzzy! Always on low power made. Still doesn’t last more than a few hrs 😡😡😡\n    - oh wow this new ios update is really killing my battery. thanks\n    - my phone has been on 2% since i plugged it up 8 hours ago. wth\n    - Seriously this new iPhone update is the worst ! Drains batteries like no other. After an hr my phone is dying.\n    - I’m not even kidding my iPhone is so screwed it just went from 99% straight of charge to boiling hot and 27% what is up with that ish ?\n    - so my iphone sixplus battery is terrible now, 100 just 15min ago, now 79% battery life! #wtf #applesucks\n    - hey why the hell does my phone go from 22 percent to 10 in one sec, like damn it was 22 percent then one second later the damn 10% remaining warning popped up\n    - 9:45 AM 100% 10 AM 3% 10 AM- 12 AM 3% Stop fuckin around on my iPhone 7 battery\n\n  cluster 7 (37 messages):\n    - They told me to redownload my songs when I’m having an issue with a TV series. Who can help me?\n    - last night I updated the iOS on my iPhone 7. This morning I woke up to find that all my music had been wiped and the cloud backup does not exist. Nothing else from my cloud has been affected. Can you help?\n    - I'm so late but I just found out we can't \"Edit Playlist\" on the #iTunes update. This is so forking boring. saying \"improving\" but this is just unsatisfying.\n    - Hey , I just updated my iTunes to the latest version and it won't stop doing this. How can I fix this?\n    - Also my Apple TV keeps dropping the connection to my phone and playback stops completely. How am I supposed to listen to music when it constantly stops playing?\n    - It would really be great if iTunes got ANYTHING right when importing new music to its library. sucks more and more with every update.\n    - since you’re so responsive. Where can I leave feedback on latest changes to podcast app? Really dislike! No full view of library so difficult to find stuff, no stop in xmins option, keep missing content. Am disappointed.\n    - when I play a podcast it doesn’t show up on my control center or lock screen. Is there a fix for this?\n\n  cluster 8 (15 messages):\n    - fix this “ I️ “\n    - I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ fix this\n    - come on. Fix the “I️” problem\n    - fix the I️ glitch please\n    - Hey plz fix this.... i️ i️ &lt;&lt;i\n    - FIX THIS I️ I️ I️ I️ I️\n    - this =&gt; I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ I️ isn’t cool. Fix it. Thanks\n    - So when will have a fix for this I️ problem?\n\n  cluster 9 (70 messages):\n    - I am so fuxking done with you and these dumb ass updates. I literally have to have this phone for another year and a half until it’s paid off and I can’t be on my phone for more than 5 minutes before it glitches and comp\n    - Dear , what the hell have you done with the new iOS update. My iPhone is almost unusable. Crash, freeze, clunky #nothappy 😡\n    - #iPhone update made my phone stupid can’t even use it anymore.. keeps freezing and speaker can’t hear nothing 😡 #AppleSupport\n    - My phone was fine but now that I updated it it’s been fucking up what kinda business y’all running? Y’all planting viruses huh?\n    - a big FUCK YOU TO stupid ass update damn near broke my phone 🖕🏼🖕🏼🖕🏼🖕🏼\n    - Fucking hell the worst update ever. Phones basically fucked now. Cheers\n    - My phone keeps freezing and having all these ugly ass glitches. Ugh aka time to update it you’re annoying\n    - Knew I️ shouldn’t have updated. Jesus Christ this phone is glitching why you do me like this??\n\n  cluster 10 (41 messages):\n    - why is IOS 11.1 doing this now ?\n    - iOS 11.1 did not fix my problem I’m still seeing the error\n    - i updated to iOS 11.1.1 and it’s still happening\n    - new bug iOS 11.1 beta 5\n    - Please dad solution for theme update ios 11.1 commented on Apple and cause me harm myself and needed tsun update solves the problem not all iPhone and has two information company like Apple how that place on halmshakl yo\n    - why i’m keep getting this popups even after the update? Running iOS 11.2 now\n    - #iOS11 #iOS11.2 public #beta This pop up keeps on coming like multiple times a day. iOS is up to date.\n    - This arrived on my IPhone ten mins ago soon after installing IOS 11.0.2. WTF! is going on Apple?\n\n  cluster 11 (56 messages):\n    - your new update has been doing weird things to my phone, what gives?\n    - not liking the new update. Phone is acting wacky!\n    - ummm this new update got my phone tweaking ...\n    - what’s going on, this update is interrupting phone calls and internet use smh\n    - can you guys fix the new update it has my airplane mode not exactly wrk i cant still send and receive messages 🧐\n    - so is anyone else not able to use their phone normally since the update? A lot of apps don’t work and it freezes all the time. Let me know thanks 🙏!\n    - What in God’s name is going on with my phone NOW. Y’all tryna break me. I️ will not be moved !\n    - can ya please fix the glitch in the update already 😭😭😭😭\n\n  cluster 12 (15 messages):\n    - uhhhhhhh is this a legit email???? Because I didn’t order that!\n    - is this a valid receipt? If so it appears my account was hacked\n    - is this a scam? I didn’t order anything\n    - what’s with the multiple people including myself and 3 friends that have over $90.00 in unauthorized charges from iTunes?\n    - money has been debited by itune..don’t know why??..plz..refund it immediately\n    - is this email legit?\n    - Can I assume that Apple will not ask me to log into my acct from an email? Phishing scam I'm sure but double checking\n    - I have just seen £10 go out my account for iTunes , can you help me out I don’t ko W what it for?\n\n  cluster 13 (51 messages):\n    - WHAT IS THIS ?????? Fix it. Yesterday.\n    - Hey -Fix this bug!!! I️ am going crazy!!!!!\n    - I️ need you to fix this glitch ASAP\n    - WHY IS THIS HAPPENING? It’s so annoying :-(\n    - so yall not gon fix this\n    - Dear PLEASE fix this it’s driving me insane.\n    - hey get your shit together and fix this shit\n    - Dear , Please fix this!\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "cluster_id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "description": "snake_case intent name, 1-3 words"
+        },
+        "description": {
+          "type": "string",
+          "description": "one sentence, what the customer wants"
+        },
+        "is_support_request": {
+          "type": "boolean",
+          "description": "false for venting, jokes, feature requests and general commentary"
+        },
+        "coherent": {
+          "type": "boolean",
+          "description": "false if these examples do not share a single intent"
+        },
+        "merge_with": {
+          "type": "string",
+          "description": "name of another cluster this duplicates, or empty string"
+        }
+      },
+      "required": [
+        "cluster_id",
+        "name",
+        "description",
+        "is_support_request",
+        "coherent",
+        "merge_with"
+      ]
+    }
+  },
+  "thinking": 2048,
+  "response": [
+    {
+      "cluster_id": 0,
+      "name": "fix_keyboard_autocorrect",
+      "description": "The customer wants the bug where typing 'I' produces an 'A' and symbol fixed.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": "fix_autocorrect_bug"
+    },
+    {
+      "cluster_id": 1,
+      "name": "fix_autocorrect_bug",
+      "description": "The customer is asking why the letter 'I' is being replaced with symbols and how to resolve it.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 2,
+      "name": "ios_performance_issues",
+      "description": "The customer is complaining about battery drain, freezing, and poor performance after updating to iOS 11.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": "update_issues"
+    },
+    {
+      "cluster_id": 3,
+      "name": "fix_question_mark_glitch",
+      "description": "The customer wants the autocorrect question mark box symbol bug fixed.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": "fix_autocorrect_bug"
+    },
+    {
+      "cluster_id": 4,
+      "name": "fix_device_crashing",
+      "description": "The customer needs help fixing an iPhone that repeatedly crashes, restarts, or shows a black loading screen.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 5,
+      "name": "complaint_hardware_support",
+      "description": "The customer is venting about recurring hardware failures, repair delays, and poor customer service.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 6,
+      "name": "fix_battery_drain",
+      "description": "The customer needs help or is complaining about rapid battery drain and sudden power drops on their iPhone.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 7,
+      "name": "media_app_help",
+      "description": "The customer needs support or is giving feedback regarding iTunes, Apple Music, and Podcasts.",
+      "is_support_request": false,
+      "coherent": false,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 8,
+      "name": "fix_keyboard_glitch",
+      "description": "The customer wants Apple to resolve the 'I' autocorrect keyboard glitch.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": "fix_autocorrect_bug"
+    },
+    {
+      "cluster_id": 9,
+      "name": "update_issues",
+      "description": "The customer is expressing anger and frustration about an iOS update causing phone freezes and glitches.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 10,
+      "name": "update_error_persists",
+      "description": "The customer is reporting that an error or popup persists even after installing an iOS update.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 11,
+      "name": "troubleshoot_update_glitches",
+      "description": "The customer wants help troubleshooting various glitches and malfunctioning apps following a new update.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 12,
+      "name": "verify_charge_phishing",
+      "description": "The customer is asking to verify suspicious emails, potential phishing scams, or unauthorized iTunes charges.",
+      "is_support_request": true,
+      "coherent": true,
+      "merge_with": ""
+    },
+    {
+      "cluster_id": 13,
+      "name": "generic_bug_venting",
+      "description": "The customer is demanding a fix for an unspecified bug without providing sufficient context or details.",
+      "is_support_request": false,
+      "coherent": true,
+      "merge_with": ""
+    }
+  ]
+}

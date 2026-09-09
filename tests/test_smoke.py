@@ -181,3 +181,73 @@ def test_agreement_handles_flat_ratings():
     """A judge that gives everything a 4 has undefined correlation, not a crash."""
     out = metrics.agreement([3, 4, 5], [4, 4, 4])
     assert out["spearman"] is None
+
+
+# --- rate limits vs size limits --------------------------------------------
+# The distinction these guard cost a wasted embedding run: splitting a batch
+# that was refused for *rate* doubles the request count against a per-minute
+# quota, so it accelerates into the limit instead of backing off.
+
+RATE_LIMIT_ERR = (
+    "ClientError: 429 RESOURCE_EXHAUSTED. Quota exceeded for metric: "
+    "embed_content_free_tier_requests, limit: 100 ... 'retryDelay': '27s'"
+)
+TOO_LARGE_ERR = (
+    "ClientError: 400 INVALID_ARGUMENT. * BatchEmbedContentsRequest.requests: "
+    "at most 100 requests can be batched"
+)
+
+
+def test_rate_limit_and_size_errors_are_distinguished():
+    rate, size = Exception(RATE_LIMIT_ERR), Exception(TOO_LARGE_ERR)
+    assert llm._is_rate_limit(rate) and not llm._is_too_large(rate)
+    assert llm._is_too_large(size) and not llm._is_rate_limit(size)
+
+
+def test_retry_delay_read_from_server_response():
+    """Honour the server's own figure; guessing shorter just refills the window."""
+    assert llm._retry_after(Exception(RATE_LIMIT_ERR)) == pytest.approx(29.0)
+    assert llm._retry_after(Exception("429 no delay given"), default=30.0) == 30.0
+
+
+def test_rate_limited_batch_is_retried_whole_not_split(monkeypatch):
+    seen = []
+
+    class FakeModels:
+        def embed_content(self, model, contents, config):
+            seen.append(len(contents))
+            if len(seen) == 1:
+                raise Exception(RATE_LIMIT_ERR)
+            return type("R", (), {
+                "embeddings": [type("E", (), {"values": [0.0, 1.0]})() for _ in contents]
+            })()
+
+    monkeypatch.setattr(llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})())
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm, "EMBED_MIN_INTERVAL", 0.0)
+
+    out = llm._embed_live(["a"] * 40, "m", 2)
+
+    assert len(out) == 40
+    assert seen == [40, 40], f"batch was split instead of retried whole: {seen}"
+
+
+def test_oversized_batch_is_split(monkeypatch):
+    seen = []
+
+    class FakeModels:
+        def embed_content(self, model, contents, config):
+            seen.append(len(contents))
+            if len(contents) > 20:
+                raise Exception(TOO_LARGE_ERR)
+            return type("R", (), {
+                "embeddings": [type("E", (), {"values": [0.0, 1.0]})() for _ in contents]
+            })()
+
+    monkeypatch.setattr(llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})())
+    monkeypatch.setattr(llm, "EMBED_MIN_INTERVAL", 0.0)
+
+    out = llm._embed_live(["a"] * 40, "m", 2)
+
+    assert len(out) == 40
+    assert max(seen) == 40 and seen[-1] <= 20, f"expected a split: {seen}"

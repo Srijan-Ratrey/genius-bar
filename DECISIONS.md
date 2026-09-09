@@ -158,3 +158,79 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
 28. **Median thread is 2 turns.** Only 24.8% reach 4 turns. The headline "106k
     Apple tweets" badly oversells the amount of usable resolution material;
     the real figure is thousands of threads, not tens of thousands.
+
+## Taxonomy (milestone 4)
+
+29. **Clusters are not well separated, and that is a finding.** *load-bearing.*
+    Best silhouette was 0.085 at k=8 across a k=4..20 sweep
+    (reports/silhouette.json). Anything below ~0.15 means there is essentially
+    no cluster structure. So this taxonomy is *imposed on a continuum*, not
+    discovered in one -- which means boundary cases are genuinely ambiguous and
+    some classifier "errors" are disagreements a second human would also have.
+    Reported rather than buried, because it caps how high intent accuracy can
+    honestly go.
+
+30. **The clustering split by register, not intent.** *load-bearing.* KMeans
+    produced four near-duplicate groups of "my phone broke after the iOS 11
+    update" differing mainly in profanity, and the LLM namer labelled the angry
+    ones "not a support request". Merging them by intent and moving anger to an
+    escalation signal is the single biggest hand-edit. Had it been left alone,
+    the classifier would have learned that swearing changes what a customer
+    needs.
+
+31. **`how_to` was proposed, then dropped after measuring it.** The keyword
+    probe returned 3.9% but the samples were overwhelmingly "how do I fix
+    [battery]" -- a *phrasing* of other intents, not an intent. Kept, it would
+    have competed with every other class for the same messages.
+
+32. **`app_or_service_issue` was added, though clustering never surfaced it.**
+    A prevalence probe found 7.5% -- bigger than four classes that clustering
+    did surface. Clustering finds what is *textually* dominant, which is not the
+    same as what matters; the iOS 11 noise drowned it out.
+
+33. **Rare-but-dangerous classes kept despite tiny volume.** data_loss (0.7%),
+    account_billing (0.9%) and device_crash_reboot (1.3%) would each get one or
+    two examples in a natural-distribution golden set. They are kept as separate
+    intents precisely because they are the escalation cases -- the ones where
+    being wrong is expensive. Merging them into a generic bucket would have
+    optimised the metric at the cost of the decision that matters.
+
+34. **`not_actionable` is a first-class intent.** Venting, insults, jokes and
+    feature requests are a large share of traffic. Forcing them into a support
+    intent produces confidently irrelevant troubleshooting, which is a worse
+    failure than admitting there is nothing to answer.
+
+35. **The corpus is a late-2017 iOS 11 snapshot.** update_performance is 38% of
+    traffic because of one OS rollout, and 25% of one cluster was a single
+    keyboard bug. The taxonomy is period-specific and would not transfer to
+    Apple's support stream today. Any headline accuracy here is accuracy on a
+    frozen moment.
+
+## Retrieval
+
+36. **Retrieval is TF-IDF, not embeddings.** *load-bearing.* The free embedding
+    quota is 1000 texts per *day*, and each text counts as one request rather
+    than each batch -- so a batch of 100 consumes 100 requests and lands exactly
+    on the 100-per-minute cap. That was the real cause of the 429s originally
+    misread as a payload-size limit. A grounding corpus of a few thousand
+    replies is therefore several days of quota, which is no basis for a pipeline
+    graders must reproduce. sklearn TF-IDF is already a dependency, costs
+    nothing, and runs instantly.
+
+37. **Sharing TF-IDF between the baseline and the system is deliberate.** With
+    retrieval held constant, the measured gap between "copy the nearest
+    historical reply" and "draft from the same retrieved evidence" isolates
+    exactly the LLM's drafting contribution. Changing retrieval *and* generation
+    at once would have produced a bigger headline number that attributed
+    nothing.
+
+38. **Embeddings kept for offline clustering only.** 604 vectors were already
+    paid for before the quota was understood, and 600 messages is ample to
+    derive 8 intents. `llm.cached_subset` exists so the clustering could run on
+    what was already bought instead of stalling a day for a fresh 1500.
+
+39. **Golden set caps any intent at ~15% and floors the rare ones.** At natural
+    distribution, 38% of the set would be one class and four classes would have
+    under two examples. Both the capped and the natural-distribution numbers
+    get reported; the gap between them is a concrete entry in the
+    misleading-headline section.

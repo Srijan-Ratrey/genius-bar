@@ -1,0 +1,166 @@
+# Intent taxonomy for AppleSupport.
+#
+# Derived, not invented: clusters came from KMeans over embeddings of 600 real
+# opening messages (scripts/derive_taxonomy.py -> data/intents_draft.yaml), then
+# hand-edited into this file. Both files are committed so the edits are auditable.
+#
+# TWO THINGS TO KNOW BEFORE TRUSTING THIS TAXONOMY:
+#
+# 1. The clusters are not well separated. Best silhouette was 0.085 at k=8
+#    (reports/silhouette.json); anything under ~0.15 means there is no clean
+#    cluster structure. This taxonomy is imposed on a continuum, not discovered
+#    in one. Boundary cases are therefore genuinely ambiguous, and some of the
+#    classifier's "errors" are disagreements a second human would also have.
+#
+# 2. The clustering split messages by REGISTER, not intent. It produced four
+#    near-duplicate groups of "my phone broke after the iOS 11 update" that
+#    differed mainly in how angry they were, and labelled the profane ones
+#    "not a support request". Those are merged here by intent, and anger is
+#    handled where it belongs -- as an escalation signal, not an intent.
+#
+# The corpus is a late-2017 snapshot dominated by the iOS 11 rollout. That is
+# why update_performance is 38% of traffic. This taxonomy is period-specific and
+# would not transfer to Apple's support stream today.
+#
+# prevalence: keyword-matched floor over all 14,963 opening messages. A floor,
+# not a measurement -- patterns undercount (49% of messages match no pattern at
+# all, including image-only "fix this" complaints).
+# risk: drives the escalation policy in genius_bar/agent.py. Nothing here is a
+# hard rule by itself; the policy combines risk with per-message signals.
+
+- name: update_performance
+  description: >
+    Battery drain, freezing, slowdown or lag that began after a software update.
+    The dominant complaint in this corpus by a wide margin.
+  prevalence: 0.384
+  risk: low
+  default_action: auto
+  resolution_hint: >
+    Historically Apple asks which iOS version, whether battery health is
+    degraded, and directs to standard steps (restart, check Battery settings,
+    update to the latest point release).
+  examples:
+    - "the new iPhone update is draining my battery like crazzzzy! Always on low power mode. Still doesn't last more than a few hrs"
+    - "Seriously my phone hasn't stopped freezing since I updated the softaware ahhhhh !"
+    - "battery life since installing iOS 11.1 is atrocious. How do I fix? Unable to use phone for more than 4 hours."
+  derived_from: [clusters 1, 2, 3, 5 -- merged; they differed by register, not intent]
+
+- name: app_or_service_issue
+  description: >
+    A named app or Apple service misbehaving -- App Store, iCloud, Apple Music,
+    iTunes, Safari, iMessage, Mail, sync. Includes questions about how to use a
+    specific service, since those share a resolution path.
+  prevalence: 0.075
+  risk: low
+  default_action: auto
+  resolution_hint: >
+    Apple typically asks which app and version, whether it reproduces after a
+    sign-out/sign-in, and links the relevant support article.
+  examples:
+    - "some amount of photos constantly disappear after I log out my iCloud account. How can I find them again?"
+    - "I have an issue with my iCloud safari book mark syncing where I have a ton of undeletable folders that sync back to my device"
+    - "is there a way to close all open apps and return to home screen at once with Apple classroom?"
+  derived_from: [not surfaced by clustering; found by prevalence probe at 7.5%]
+
+- name: autocorrect_bug
+  description: >
+    The iOS 11 keyboard defect that replaced the letter "I" with a symbol or
+    question-mark box. One known bug with one known fix.
+  prevalence: 0.055
+  risk: low
+  default_action: auto
+  resolution_hint: >
+    Fixed in iOS 11.1.1. Interim workaround was a Text Replacement entry
+    mapping the broken glyph to "I".
+  examples:
+    - "fix the I glitch please"
+    - "Wtf is wrong with typing the letter I"
+    - "when tf you going to fix this question mark shit."
+  # Worth flagging: clustering put ~25% of messages here because it absorbed
+  # generic "WHAT IS THIS?? Fix it" messages that were image-only complaints.
+  # The keyword floor says 5.5%. The truth is in between, and the gap matters --
+  # this class is trivially easy, so over-representing it inflates accuracy.
+  derived_from: [clusters 4, 7 -- the model named both identically]
+
+- name: hardware_repair
+  description: >
+    Physical failure, damage, warranty and repair entitlement, or frustration at
+    repeated repairs. Involves money and a service commitment.
+  prevalence: 0.019
+  risk: high
+  default_action: escalate
+  resolution_hint: >
+    Apple routes these to a Genius Bar appointment or a service request, and
+    will not commit to warranty coverage over Twitter.
+  examples:
+    - "Spent 5k on iMac. Has been to the Genius Bar 4 Times this year! Still not working! Hurting my business. Over it!"
+    - "So disheartening that my Apple Watch's microphone has broken TWICE and refuses to replace it."
+    - "I have a 2012 Macbook Pro w/o Apple Care. Is there anything that can be done about this? Preferably free of charge.."
+  derived_from: [cluster 6 -- flagged incoherent by the namer, tightened by hand]
+
+- name: device_crash_reboot
+  description: >
+    Device restarting on its own, refusing to power on, or overheating. Kept
+    separate from update_performance because overheating is a safety matter.
+  prevalence: 0.013
+  risk: high
+  default_action: escalate
+  resolution_hint: >
+    Apple asks for the model and iOS version and usually moves to DM or a
+    service appointment. Overheating gets handled as a safety issue.
+  examples:
+    - "I tried everything to fix my iPhone but it's still restart every 2-3 minutes"
+    - "my iPhone is so screwed it just went from 99% straight of charge to boiling hot and 27% what is up with that ish ?"
+    - "There is a wired problem happening with iphones where it starts up and just keep starting"
+  derived_from: [cluster 1 -- the help-seeking portion]
+
+- name: account_billing
+  description: >
+    Purchases, subscriptions, refunds, unauthorised charges, iTunes credit, and
+    locked accounts. Rare but never safe to auto-answer.
+  prevalence: 0.009
+  risk: high
+  default_action: escalate
+  resolution_hint: >
+    Apple directs billing disputes to reportaproblem.apple.com or account
+    recovery, and never discusses charges publicly.
+  examples:
+    - "what's with the multiple people including myself and 3 friends that have over $90.00 in unauthorized charges from iTunes?"
+    - "Hi i am locked out of my iTunes account. Status of recovery says 23 hours however i need access urgently."
+    - "Tried to re-download Instagram and was told I need billing information. Typed in my information exactly and it told me my information w"
+  derived_from: [not surfaced by clustering; found by prevalence probe]
+
+- name: data_loss
+  description: >
+    Photos, contacts, music, notes or messages missing, or a backup found to be
+    absent. Rare, and often irreversible by the time the customer tweets.
+  prevalence: 0.007
+  risk: high
+  default_action: escalate
+  resolution_hint: >
+    Apple moves these to DM immediately to check iCloud backup state. Recovery
+    depends on a backup existing, so no public answer is safe.
+  examples:
+    - "Hey , what gives? My iPhone7 was just fine yesterday. 2day, I'm missing contacts. Even though I back up to iCloud, they're not there."
+    - "last night I updated the iOS on my iPhone 7. This morning I woke up to find that all my music had been wiped and the cloud backup does not exist."
+    - "why have all my numbers deleted off my phone randomly? I have the new IOS. Help"
+  derived_from: [cluster 0]
+
+- name: not_actionable
+  description: >
+    No answerable request: venting, insults, jokes, feature requests, and
+    commentary on Apple as a company. A legitimate category, not noise -- forcing
+    these into a support intent produces confidently irrelevant troubleshooting.
+  prevalence: 0.20
+  risk: low
+  default_action: auto
+  resolution_hint: >
+    Acknowledge briefly, do not troubleshoot, do not ask diagnostic questions.
+    Never draft steps for a problem the customer did not report.
+  examples:
+    - "a big FUCK YOU TO stupid ass update damn near broke my phone"
+    - "Wish there were an easier way to chose an app that's not in the dock however."
+    - "you make an all glass phone, Yet I still have to have YouTube open to play the music"
+  # Prevalence is a rough estimate: 49% of messages match no intent keyword, and
+  # this class is a large but unmeasured share of that residue.
+  derived_from: [clusters 2, 5, 6 -- the venting portions the namer flagged]
