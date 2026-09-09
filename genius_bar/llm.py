@@ -27,7 +27,6 @@ import json
 import os
 import re
 import sys
-import threading
 import time
 from pathlib import Path
 from typing import Any, Callable, Sequence
@@ -63,7 +62,7 @@ EMBED_DIM = 768
 EMBED_BATCH = 80
 
 # Models that reject a thinking_config outright.
-NO_THINKING_CONFIG = {"gemma-4-31b-it", "gemini-3.5-flash-lite"}
+NO_THINKING_CONFIG = {"gemma-4-31b-it"}
 
 # Spacing between live calls, to stay under the per-minute cap. Only applies on
 # cache misses, so a cached replay is unaffected. Embeddings get their own
@@ -86,26 +85,23 @@ class _Budget:
         self.cached = 0
         self.embed_live = 0
         self.embed_texts = 0
-        self._lock = threading.Lock()
         self._last_call = 0.0
 
     def hit(self, n: int = 1) -> None:
-        with self._lock:
-            self.cached += n
+        self.cached += n
 
     def spend(self, kind: str = "llm", texts: int = 0) -> None:
         """Record a live request, sleeping first to respect the per-minute cap."""
-        with self._lock:
-            floor = EMBED_MIN_INTERVAL if kind == "embed" else MIN_INTERVAL
-            wait = floor - (time.monotonic() - self._last_call)
-            if wait > 0:
-                time.sleep(wait)
-            self._last_call = time.monotonic()
-            if kind == "embed":
-                self.embed_live += 1
-                self.embed_texts += texts
-            else:
-                self.live += 1
+        floor = EMBED_MIN_INTERVAL if kind == "embed" else MIN_INTERVAL
+        wait = floor - (time.monotonic() - self._last_call)
+        if wait > 0:
+            time.sleep(wait)
+        self._last_call = time.monotonic()
+        if kind == "embed":
+            self.embed_live += 1
+            self.embed_texts += texts
+        else:
+            self.live += 1
 
     def report(self) -> None:
         if not (self.live or self.embed_live):

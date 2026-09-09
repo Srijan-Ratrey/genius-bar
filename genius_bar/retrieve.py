@@ -28,7 +28,7 @@ import re
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from genius_bar.data import agent_replies, load_threads
+from genius_bar.data import agent_replies, clean_text, load_threads
 
 # "we've sent you a DM" -- the reply exists but the resolution is private.
 DEFLECTION = re.compile(
@@ -51,7 +51,7 @@ LINK = re.compile(r"\[support link\]")
 MIN_REPLY_CHARS = 40
 
 
-def build_corpus(df: pd.DataFrame | None = None) -> pd.DataFrame:
+def build_corpus() -> pd.DataFrame:
     """Customer->reply pairs that carry enough content to ground a draft.
 
     The filter is the single biggest bias in this project and is reported as
@@ -60,7 +60,7 @@ def build_corpus(df: pd.DataFrame | None = None) -> pd.DataFrame:
     sensitive or account-specific to answer in public. What remains therefore
     over-represents problems with a tidy public answer.
     """
-    pairs = agent_replies(load_threads() if df is None else df)
+    pairs = agent_replies(load_threads())
     reply = pairs["reply_clean"]
 
     has_content = (
@@ -86,11 +86,11 @@ class Retriever:
     TF-IDF holds up well against embeddings.
     """
 
-    def __init__(self, corpus: pd.DataFrame | None = None, min_df: int = 2):
+    def __init__(self, corpus: pd.DataFrame | None = None):
         self.corpus = build_corpus() if corpus is None else corpus.reset_index(drop=True)
         self.vectorizer = TfidfVectorizer(
             ngram_range=(1, 2),
-            min_df=min_df,
+            min_df=2,
             sublinear_tf=True,
             strip_accents="unicode",
             lowercase=True,
@@ -106,8 +106,6 @@ class Retriever:
         pieces of evidence, and would let one template crowd out the rest of the
         context window.
         """
-        from genius_bar.data import clean_text
-
         vec = self.vectorizer.transform([clean_text(query)])
         scores = (self.matrix @ vec.T).toarray().ravel()
 
