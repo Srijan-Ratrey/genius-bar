@@ -251,3 +251,100 @@ def test_oversized_batch_is_split(monkeypatch):
 
     assert len(out) == 40
     assert max(seen) == 40 and seen[-1] <= 20, f"expected a split: {seen}"
+
+
+# --- escalation policy -----------------------------------------------------
+# The component where a silent bug is most expensive: a wrongly auto-handled
+# payment dispute or safety report is an incident, not a metric regression.
+
+from genius_bar.agent import MIN_CONFIDENCE, MIN_EVIDENCE_SCORE, decide, load_intents  # noqa: E402
+
+CONFIDENT, GROUNDED = 0.95, 0.40
+
+
+@pytest.mark.parametrize("signal", [
+    "safety_risk", "legal_or_press_threat", "payment_dispute",
+    "irreversible_data_loss", "non_english",
+])
+def test_hard_signals_escalate_even_when_confident_and_grounded(signal):
+    action, reason = decide("update_performance", CONFIDENT, [signal], GROUNDED)
+    assert action == "escalate", f"{signal} was auto-handled"
+    assert reason, "escalation must always carry a stated reason"
+
+
+def test_severity_order_determines_the_stated_reason():
+    """Safety outranks everything: the reason given must be the most serious one."""
+    _, reason = decide(
+        "data_loss", 0.1, ["safety_risk", "payment_dispute", "repeat_contact"], 0.0
+    )
+    assert "safety" in reason.lower()
+
+
+def test_high_risk_intents_never_auto_handle():
+    for name, meta in load_intents().items():
+        if meta["risk"] != "high":
+            continue
+        action, _ = decide(name, CONFIDENT, [], GROUNDED)
+        assert action == "escalate", f"high-risk intent {name} was auto-handled"
+
+
+def test_low_confidence_escalates():
+    action, reason = decide("update_performance", MIN_CONFIDENCE - 0.01, [], GROUNDED)
+    assert action == "escalate" and "confidence" in reason
+
+
+def test_ungrounded_draft_escalates():
+    """No precedent means a "grounded" draft would be grounded in noise."""
+    action, reason = decide("update_performance", CONFIDENT, [], MIN_EVIDENCE_SCORE - 0.01)
+    assert action == "escalate" and "precedent" in reason
+
+
+def test_routine_case_auto_handles():
+    action, _ = decide("update_performance", CONFIDENT, [], GROUNDED)
+    assert action == "auto", "nothing would ever be automated"
+
+
+def test_anger_alone_does_not_escalate():
+    """A deliberate policy choice, not an oversight.
+
+    Profanity is the default register in this corpus. Escalating on it would
+    route 30-40% of traffic to humans and defeat the point of the system, so
+    anger is passed to the drafting step to soften tone instead. Documented in
+    DECISIONS.md and revisited in the report's failure analysis.
+    """
+    action, _ = decide("update_performance", CONFIDENT, ["severe_anger"], GROUNDED)
+    assert action == "auto"
+
+
+def test_off_taxonomy_label_does_not_become_a_confident_prediction():
+    """A hallucinated intent name must not sail through as high confidence."""
+    action, _ = decide("refund_my_money_now", 0.99, [], GROUNDED)
+    assert action == "escalate"
+
+
+def test_ungrounded_support_draft_is_downgraded_to_escalate(monkeypatch):
+    """The grounding claim has to be enforced, not just asserted.
+
+    Retrieval score says similar precedent EXISTS; it cannot say the draft used
+    any. A support-intent draft that cites nothing is not grounded, whatever
+    its score was.
+    """
+    from genius_bar import agent
+
+    monkeypatch.setattr(agent, "classify", lambda m, **kw: [
+        {"intent": "update_performance", "confidence": 0.95, "signals": []},
+        {"intent": "not_actionable", "confidence": 0.95, "signals": []},
+    ])
+    monkeypatch.setattr(agent, "draft", lambda items, **kw: [
+        {"draft": "Have you tried restarting?", "used_evidence": []} for _ in items
+    ])
+
+    class FakeRetriever:
+        def search(self, q, k=5):
+            return [{"customer": "c", "reply": "r", "score": 0.9}]
+
+    support, venting = agent.triage(["battery dies fast", "you all suck"], FakeRetriever())
+
+    assert support.action == "escalate" and "not grounded" in support.reason
+    assert venting.action == "auto", "not_actionable needs no precedent to cite"
+    assert support.grounded is False
