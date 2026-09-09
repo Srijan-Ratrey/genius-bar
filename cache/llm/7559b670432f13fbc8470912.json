@@ -1,0 +1,19 @@
+{
+  "model": "gemini-3.7-flash",
+  "prompt": "Reply with JSON: the single word 'ok' as field 'status'.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "status"
+    ]
+  },
+  "thinking": 0,
+  "response": {
+    "status": "ok"
+  }
+}

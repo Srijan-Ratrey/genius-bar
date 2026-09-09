@@ -1,0 +1,19 @@
+{
+  "model": "gemma-4-31b-it",
+  "prompt": "Reply with JSON: the single word 'ok' as field 'status'.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "status"
+    ]
+  },
+  "thinking": null,
+  "response": {
+    "status": "ok"
+  }
+}

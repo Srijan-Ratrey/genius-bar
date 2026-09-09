@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = REPO_ROOT / "data" / "raw"
@@ -27,6 +28,10 @@ def find_raw_csv() -> Path:
     local = list(RAW_DIR.glob("twcs*.csv"))
     if local:
         return local[0]
+
+    # Loaded here rather than at import time so any ad-hoc script gets the
+    # credentials without having to remember to call load_dotenv itself.
+    load_dotenv(REPO_ROOT / ".env")
 
     if not (os.getenv("KAGGLE_USERNAME") and os.getenv("KAGGLE_KEY")):
         raise SystemExit(
@@ -76,7 +81,7 @@ def _roots(child_to_parent: dict[int, int]) -> dict[int, int]:
 def build_brand_threads(
     csv_path: Path | None = None,
     brand: str = BRAND,
-    n_threads: int | None = 4000,
+    n_threads: int | None = 15_000,
     seed: int = 0,
 ) -> pd.DataFrame:
     """Reconstruct the threads `brand` took part in.
@@ -140,9 +145,6 @@ def load_threads(path: Path = THREADS_PARQUET) -> pd.DataFrame:
 
 
 def main() -> None:
-    from dotenv import load_dotenv
-
-    load_dotenv(REPO_ROOT / ".env")
     df = build_brand_threads()
     THREADS_PARQUET.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(THREADS_PARQUET, index=False)
