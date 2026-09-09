@@ -234,3 +234,72 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
     under two examples. Both the capped and the natural-distribution numbers
     get reported; the gap between them is a concrete entry in the
     misleading-headline section.
+
+## Grounding (milestone 5)
+
+40. **"Grounded" had to be redefined downward, honestly.** *load-bearing.* The
+    assignment asks for replies grounded in how the brand "historically
+    resolved" similar issues. Apple's public record barely contains
+    resolutions: 53.5% of replies are DM deflections, and 75.9% contain a t.co
+    link to a support article whose content is not in the dataset. What the
+    record *does* contain densely is Apple's first-response behaviour -- which
+    question they ask first, which setting they point at, when they go private.
+    That is what the system grounds in, and the report says so rather than
+    claiming resolution quality it cannot have.
+
+41. **URLs are replaced with a marker, not deleted.** An early measurement
+    showed "0.0% of replies link an article", which was an artefact of
+    `clean_text` stripping URLs before the regex ran. Since Apple's answer is
+    frequently a bare link, deleting it turned real resolutions into "Try this
+    out:" and made them look empty. Preserving `[support link]` took the usable
+    corpus from 1,346 pairs (6.9%) to 6,230 (31.9%).
+
+42. **The corpus filter is the project's biggest bias.** Dropping DM
+    deflections removes over half the data, and those are disproportionately
+    the *hard* cases -- the ones Apple judged too complex or account-specific to
+    answer publicly. What survives over-represents problems with a tidy public
+    answer, so retrieval quality is measured on an easier distribution than
+    production. Reported, not buried.
+
+43. **Duplicate replies stay in the index but are collapsed in results.**
+    Apple's templated openers recur dozens of times, and that frequency is real
+    ranking signal -- but five copies of one sentence is not five pieces of
+    evidence, and would crowd the draft's context window.
+
+## Escalation policy (milestone 6)
+
+44. **Rule order encodes severity, because order picks the stated reason.**
+    First match wins, so rules run most-severe first and a message with several
+    problems is escalated for the worst one. There is a test asserting that a
+    safety signal outranks a payment dispute.
+
+45. **`decide()` re-validates the intent even though `classify()` already
+    did.** A caught test failure, not a hypothetical: an off-taxonomy label has
+    no risk level, so every risk-based rule would have silently passed it
+    through to auto-handling. `decide` is the safety-critical function and must
+    not depend on its caller having sanitised anything.
+
+46. **Severe anger does NOT escalate on its own.** *load-bearing.* Profanity is
+    the default register in this corpus, so escalating on it would route 30-40%
+    of traffic to a human and defeat the system's purpose. Anger is passed to
+    the drafting step to soften tone instead. This is a genuine policy judgement
+    that could be wrong, it has an explicit test documenting the choice, and it
+    is revisited in the failure analysis.
+
+47. **Drafts are generated only for auto-handled messages.** Drafting for an
+    escalated message spends quota on text nobody sends, and worse, invites an
+    agent to paste a reply the policy just judged unsafe to send.
+
+48. **A support draft citing no precedent is downgraded to escalate.**
+    *load-bearing.* MIN_EVIDENCE_SCORE only proves similar precedent *exists*;
+    it cannot tell whether the draft used any. Observed in the first end-to-end
+    run: a fluent, generic reply with `used_evidence: []` that had passed the
+    score gate. For a system whose central claim is groundedness, that is the
+    exact case a human should see. `not_actionable` is exempt, since
+    acknowledging venting without troubleshooting is correct.
+
+49. **The escalation policy is robust to intent errors, by design.** In testing,
+    an overheating complaint was classified `device_crash_reboot` (arguably
+    wrong -- it is thermal, not a reboot) but still escalated correctly, because
+    the safety signal fires independently of the intent. Decoupling the risk
+    read from the classification is what makes that work.

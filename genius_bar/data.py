@@ -144,7 +144,7 @@ _URL = re.compile(r"https?://\S+")
 _WS = re.compile(r"\s+")
 
 
-def clean_text(text: str) -> str:
+def clean_text(text: str, link_marker: str = "") -> str:
     """Strip handles and links, keeping everything that carries intent.
 
     Emoji, punctuation and casing are deliberately preserved: "WHY IS THIS
@@ -153,8 +153,14 @@ def clean_text(text: str) -> str:
 
     Handles go because @AppleSupport and its numeric alias @115858 appear in
     most messages and carry no intent -- left in, they dominate TF-IDF.
+
+    `link_marker` replaces URLs instead of deleting them. It matters for agent
+    replies: Apple's actual answer is very often a bare t.co link to a support
+    article, so deleting it turns a real resolution into "Try this out:" and
+    makes the reply look empty. The default stays "" so that the taxonomy
+    derived earlier remains reproducible against its committed embedding cache.
     """
-    text = _URL.sub(" ", text)
+    text = _URL.sub(f" {link_marker} " if link_marker else " ", text)
     text = _MENTION.sub(" ", text)
     return _WS.sub(" ", text).strip()
 
@@ -180,8 +186,12 @@ def agent_replies(df: pd.DataFrame) -> pd.DataFrame:
 
     replies = df[(df["author_id"] == BRAND) & prev_inbound.fillna(False)].copy()
     replies["customer_text"] = prev_text[replies.index]
-    replies["customer_clean"] = replies["customer_text"].map(clean_text)
-    replies["reply_clean"] = replies["text"].map(clean_text)
+    replies["customer_clean"] = replies["customer_text"].map(
+        lambda t: clean_text(t, link_marker="[image]")
+    )
+    replies["reply_clean"] = replies["text"].map(
+        lambda t: clean_text(t, link_marker="[support link]")
+    )
     return replies.reset_index(drop=True)
 
 
