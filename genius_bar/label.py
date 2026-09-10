@@ -173,12 +173,18 @@ def label_intents(only_pass: str | None = None) -> None:
         "Progress saves after every answer.\n"
     )
 
-    suggestions = _load_suggestions(todo)
+    # Suggestions are fetched when the assisted pass is actually reached, not
+    # up front: someone labelling only the blind 60 today should spend no
+    # generate quota at all, and should not wait on 15 requests to start.
+    suggestions: dict[int, str] | None = None
 
     for n, item in enumerate(todo, 1):
         console.rule(f"{n}/{len(todo)}  (done: {len(done)}/{len(items)})")
-        # Enforced, not merely recorded.
-        hint = suggestions.get(item["id"]) if item["pass"] == "assisted" else None
+        hint = None
+        if item["pass"] == "assisted":
+            if suggestions is None:
+                suggestions = _load_suggestions(todo)
+            hint = suggestions.get(item["id"])
         record = ask_label(item, intents, hint)
         if record is None:
             console.print(f"\n[yellow]saved. {len(done)}/{len(items)} labelled.[/yellow]")
