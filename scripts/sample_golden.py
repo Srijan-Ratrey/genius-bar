@@ -173,8 +173,14 @@ def main() -> None:
 
     # Importance weight: how many real messages each golden example stands for.
     # Lets natural-distribution metrics be recovered from a balanced sample.
+    #
+    # Computed from the FINAL counts, not from `alloc`. The hard-case top-up
+    # swaps examples between strata after allocation, so alloc is stale by then
+    # -- using it left the two swapped strata ~18% wrong and made the weights
+    # sum to more messages than the corpus contains.
+    final_counts = golden["proxy_intent"].value_counts().to_dict()
     weights = {
-        name: shares[name] / max(alloc.get(name, 1), 1) for name in strata
+        name: shares[name] / max(final_counts.get(name, 1), 1) for name in strata
     }
 
     with OUT_PATH.open("w") as fh:
