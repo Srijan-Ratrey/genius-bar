@@ -1,0 +1,90 @@
+{
+  "model": "gemini-3.7-flash",
+  "prompt": "You are triaging opening messages sent to Apple's support account on Twitter.\n\nFor each message return the single best intent, a calibrated confidence, and any\nrisk signals genuinely present.\n\nINTENTS (use exactly one of these names):\n- update_performance: Battery drain, freezing, slowdown or lag that began after a software update. The dominant complaint in this corpus by a wide margin.\n- app_or_service_issue: A named app or Apple service misbehaving -- App Store, iCloud, Apple Music, iTunes, Safari, iMessage, Mail, sync. Includes questions about how to use a specific service, since those share a resolution path.\n- autocorrect_bug: The iOS 11 keyboard defect that replaced the letter \"I\" with a symbol or question-mark box. One known bug with one known fix.\n- hardware_repair: Physical failure, damage, warranty and repair entitlement, or frustration at repeated repairs. Involves money and a service commitment.\n- device_crash_reboot: Device restarting on its own, refusing to power on, or overheating. Kept separate from update_performance because overheating is a safety matter.\n- account_billing: Purchases, subscriptions, refunds, unauthorised charges, iTunes credit, and locked accounts. Rare but never safe to auto-answer.\n- data_loss: Photos, contacts, music, notes or messages missing, or a backup found to be absent. Rare, and often irreversible by the time the customer tweets.\n- not_actionable: No answerable request: venting, insults, jokes, feature requests, and commentary on Apple as a company. A legitimate category, not noise -- forcing these into a support intent produces confidently irrelevant troubleshooting.\n\nRISK SIGNALS (include only those actually present; an empty list is normal):\n- legal_or_press_threat: threatens legal action, regulators, or media\n- safety_risk: device overheating, burning, swelling, or physical harm\n- payment_dispute: disputed, unauthorised or duplicate charge; demands a refund\n- irreversible_data_loss: data appears permanently lost, with no backup\n- repeat_contact: says they have already asked, or already tried the usual advice\n- non_english: written mainly in a language other than English\n- multi_intent: contains two or more unrelated requests\n- severe_anger: sustained abuse or profanity directed at the brand\n\nGuidance:\n- Judge what the customer NEEDS, not how politely they said it. An furious\n  \"iOS 11 RUINED MY PHONE FIX IT\" is still update_performance; the anger is a\n  separate signal, not a different intent.\n- not_actionable means there is nothing to answer -- venting, jokes, feature\n  requests. Do not use it merely because the message is rude.\n- confidence should be genuinely calibrated. These categories overlap and many\n  messages are ambiguous; report ~0.5 when torn rather than defaulting high.\n  Low confidence is useful information, not a failure.\n\nReturn one object per message, in order.\n\nMESSAGES:\n1. Tried installing macOS High Sierra 4 times, always gets stuck before reboot step, x minutes remaining, any ideas ?\n2. It bears repeating while my computer reboots again. The reliability of my MacBook Pro has plummeted since macOS High Seirra update.\n3. Hi you are rubbish. We can’t watch any of the films we’ve purchased as it’s saying a billing error.Want full refund for all purchases\n4. hi, why cant i add my debit card to my apple id as it always appears “please contact iTunes support to complete this transaction.” Please help\n5. 1. I had upgraded to High Sierra a week back, my MacBook pro started shutting down randomly since the day before\n6. any response to my lost parcel that was sent to 3 weeks ago? Nothing from your customer support or online...\n7. why are my newly saved contacts being deleted?? I have not changed any settings. Wtf\n8. why is this happening?\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "intent": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0.0-1.0"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "legal_or_press_threat",
+              "safety_risk",
+              "payment_dispute",
+              "irreversible_data_loss",
+              "repeat_contact",
+              "non_english",
+              "multi_intent",
+              "severe_anger"
+            ]
+          },
+          "description": "only signals genuinely present"
+        }
+      },
+      "required": [
+        "intent",
+        "confidence",
+        "signals"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "intent": "update_performance",
+      "confidence": 0.85,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.75,
+      "signals": []
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.95,
+      "signals": [
+        "payment_dispute"
+      ]
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.85,
+      "signals": []
+    },
+    {
+      "intent": "not_actionable",
+      "confidence": 0.7,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "not_actionable",
+      "confidence": 0.95,
+      "signals": []
+    }
+  ]
+}
