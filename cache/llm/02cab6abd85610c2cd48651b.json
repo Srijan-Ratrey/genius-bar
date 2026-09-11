@@ -1,0 +1,63 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: I cant access to imessage in an iPad. I have a new apple ID. what's wrong?\n  proposed reply: Check out the following article and see if the steps it suggests are any help: [support link]\n  precedent available to the drafter:\n      1. customer: hey! i cant access my iMessage! Help me please [image]\n         Apple replied: Check out the following article and see if the steps it suggests are any help: [support link]\n      2. customer: Hey I️I️ I️ I️ I️ I️ what’s wrong bruh?\n         Apple replied: We'd like to help you find out. Which model and iOS version is installed? Have you tried any steps since this started?\n      3. customer: As a new Apple watch user. What’s wrong with the third ring? Attitude? Defective? Is it just because of me?! [image]\n         Apple replied: We'd be happy to help. Have you stood in the last 12 hours while wearing the watch? What version of watchOS are you running?\n      4. customer: hi, im having an issue where i cant get access to my apple music because i’m out of region. how do i gain access to it? thanks [image]\n         Apple replied: We're here to help. Please reach out directly to our iTunes team so they can look into this with you: [support link]\n      5. customer: if someone has set up 2FA on an iPad and the codes aren’t being received at a phone how do we turn it off to access Apple id?\n         Apple replied: Let's try following this article step by step: [support link]\n\n--- REPLY 2 ---\n  customer wrote: okay apple 🍎 what is the latest update done to our phones - hugely reduced battery life-rebooting constantly ... what is going on ?\n  proposed reply: We'd like to help out. Have you tried the steps here? [support link]\n  precedent available to the drafter:\n      1. customer: I️I️ WHAT IS HAPPENING TO OUR PHONES\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      2. customer: okay Apple what’s going on with my “I’s”\n         Apple replied: Check out our article [support link] if you're seeing this issue, let us know if we can still help.\n      3. customer: what did you do to our phones [image]\n         Apple replied: Thanks for reaching out. Check out this article that can help: [support link]\n      4. customer: what is this??? I️ 🤬\n         Apple replied: We're happy to assist. Which iOS version are you currently running? Go to Settings &gt; General &gt; About for the version.\n      5. customer: Seriously what have you done to my battery life #iOS11\n         Apple replied: We'd like to help out. Have you tried the steps here? [support link]\n\n--- REPLY 3 ---\n  customer wrote: Why does the letter “eye” keep autocorrecting to this I️ #TF\n  proposed reply: We want your keyboard working for you; we'll do all we can to help. Let's try these steps: [support link]\n  precedent available to the drafter:\n      1. customer: Why does the letter “eye” keep autocorrecting to this I️ #TF\n         Apple replied: We want your keyboard working for you; we'll do all we can to help. Let's try these steps: [support link]\n      2. customer: Why does my “I️” keep autocorrecting to a weird symbol??😳🙃 HELP🆘\n         Apple replied: We can help. Try our steps here: [support link]\n      3. customer: WHY THE FUCK YALL KEEP AUTOCORRECTING MY FUCKIN “I’s” TO “I️ “?!\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      4. customer: does anyone’s i.t keep autocorrecting to i.t. i.t is very annoying and idk how to fix i.t\n         Apple replied: We'd like to help. What kind of device are you using and it is updated to iOS 11.1.2? You can check in Settings &gt; General &gt; About\n      5. customer: I️ do not understand why this keeps happening on Snapchat why does the letter I️ keep auto correcting to this? [image]\n         Apple replied: Thanks for reaching out to us. We'd like to have you try the following steps and then restart afterward: [support link]\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    }
+  ]
+}

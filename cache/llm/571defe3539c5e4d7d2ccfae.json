@@ -1,0 +1,216 @@
+{
+  "model": "gemini-3.5-flash",
+  "prompt": "You are triaging opening messages sent to Apple's support account on Twitter.\n\nFor each message return the single best intent, a calibrated confidence, and any\nrisk signals genuinely present.\n\nINTENTS (use exactly one of these names):\n- update_performance: Battery drain, freezing, slowdown or lag that began after a software update. The dominant complaint in this corpus by a wide margin.\n- app_or_service_issue: A named app or Apple service misbehaving -- App Store, iCloud, Apple Music, iTunes, Safari, iMessage, Mail, sync. Includes questions about how to use a specific service, since those share a resolution path.\n- autocorrect_bug: The iOS 11 keyboard defect that replaced the letter \"I\" with a symbol or question-mark box. One known bug with one known fix.\n- hardware_repair: Physical failure, damage, warranty and repair entitlement, or frustration at repeated repairs. Involves money and a service commitment.\n- device_crash_reboot: Device restarting on its own, refusing to power on, or overheating. Kept separate from update_performance because overheating is a safety matter.\n- account_billing: Purchases, subscriptions, refunds, unauthorised charges, iTunes credit, and locked accounts. Rare but never safe to auto-answer.\n- data_loss: Photos, contacts, music, notes or messages missing, or a backup found to be absent. Rare, and often irreversible by the time the customer tweets.\n- not_actionable: No answerable request: venting, insults, jokes, feature requests, and commentary on Apple as a company. A legitimate category, not noise -- forcing these into a support intent produces confidently irrelevant troubleshooting.\n\nRISK SIGNALS (include only those actually present; an empty list is normal):\n- legal_or_press_threat: threatens legal action, regulators, or media\n- safety_risk: device overheating, burning, swelling, or physical harm\n- payment_dispute: disputed, unauthorised or duplicate charge; demands a refund\n- irreversible_data_loss: data appears permanently lost, with no backup\n- repeat_contact: says they have already asked, or already tried the usual advice\n- non_english: written mainly in a language other than English\n- multi_intent: contains two or more unrelated requests\n- severe_anger: sustained abuse or profanity directed at the brand\n\nGuidance:\n- Judge what the customer NEEDS, not how politely they said it. An furious\n  \"iOS 11 RUINED MY PHONE FIX IT\" is still update_performance; the anger is a\n  separate signal, not a different intent.\n- not_actionable means there is nothing to answer -- venting, jokes, feature\n  requests. Do not use it merely because the message is rude.\n- confidence should be genuinely calibrated. These categories overlap and many\n  messages are ambiguous; report ~0.5 when torn rather than defaulting high.\n  Low confidence is useful information, not a failure.\n\nReturn one object per message, in order.\n\nMESSAGES:\n1. My iPhone has been ridiculously slow and freezing and glitching like can y’all relax on me\n2. - Hi, I get error message as below everytime I open ITunes, please help me fix my problem.\n3. OS X High Sierra 10.13.1 keeps losing wireless internet access after waking up. Reboot seems to fix, but is most inconvenient. MBP 2012. Any ETA on a fix?\n4. thx for this stupid update that deleted all of my important messages from my phone. U ROCK !\n5. Does support MacBook Pro Touch Bar battery replacement, and if it does, how much does it cost?\n6. Iphone iOS 11.1.1 is horrible. Battery runs flat in 4 hours Crappy software and seriously dissapointing!!!! What's the solution you are offering??????? #notahappycustomer\n7. I fixed the stupid glitch on my keyboard but it happened so much before that it’s now coming up as a suggestion. Pls stop.\n8. hi, I was wondering if I could take my iPad charger in and get a new. My apple care doesn’t expire until April of 2018. Thanks\n9. dude....11.1.....what's the deal? Tired of reading question marks in a box 😏\n10. i reset all settings and now my phone wont let me put ME as me (in the contacts) and I can't give it a background at all\n11. Wtf is charging for purchases I never made &amp; declining all my cards fuck that I never had this problem before with Samsung\n12. I’m Having Trouble With The App Store When It Comes Down To Me Not Being Able To Download Anything Because It Keeps Saying My Credit Card Is Invalid .\n13. Hello, I updated my iPhone on itunes an error occured (26). Since that he's stuck on the itunes logo.any chance to save data?\n14. I need help I have a iPhone 7 plus and it wont turn on I left charging over the night and it doesn't want to work\n15. Hey why the hell haven’t y’all fixed this stupid question mark glitch? Shit been going on for too long and is getting annoying. Step yo game up with y’all rich asses\n16. Worst exp w/ iPhone X. Hardware failure. No ETA on replacement. disconnects me &amp; AT&amp;T no help getting old phone working. 😡\n17. all my photos and videos from all my concerts got deleted off icloud drive but the pictures of me and someone i don’t associate myself w anymore are still on there 🤔 fix this b\n18. My contacts have disappeared! Why?\n19. what is going on with this last update! All of our phones going crazy. Freezing, rebooting, moving slowly...\n20. Dear , for the 2nd time in 10 Days all my photos have disappeared except for 12 from 3 years ago.\n21. your new update is god awful and fucked up my phone 😤😤😤\n22. Wtf is wrong with typing the letter I️\n23. cuando la app MAPAS va a permitir navegar en Latinoamérica dándote indicaciones? Uno se compra el #APPLECARPLAY para usarlo y solo vez un mapa en movimiento sin indicaciones... ósea no sirve! para esto liberen #WAZE hasta q este habilitado! #PERU\n24. Hi! Is my Match music covered by an subscription? That is, can I let my iTunes Match subscription lapse and have the same access to that music in my Apple Music subscription? Uploaded songs, etc.\n25. why can’t I️ type the letter I️ ??\n26. Working on My #MacBookPro and just witnessed the screen crack....bizarre! Is this a thing? ? It’s 3 years 2 months old. #beforemyeyes #isitacrack? #pleasedontbebroken\n27. Just wondering two things: 1 - Why are movies that I *DIDN’T* purchase showing up in my iTunes? 2 - Why do I now have duplicates of movies that I *DID* purchase? Please help.\n28. been trying to update my apps on the AppStore and it keeps asking me to update my billing info.My details haven’t changed HELP\n29. can I get a refund for #iPhone7Plus ?\n30. Just got locked out from iPhone because my passcode stopped working. I have been typing it for a year, at least once per day, and I am...\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "intent": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0.0-1.0"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "legal_or_press_threat",
+              "safety_risk",
+              "payment_dispute",
+              "irreversible_data_loss",
+              "repeat_contact",
+              "non_english",
+              "multi_intent",
+              "severe_anger"
+            ]
+          },
+          "description": "only signals genuinely present"
+        }
+      },
+      "required": [
+        "intent",
+        "confidence",
+        "signals"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "intent": "update_performance",
+      "confidence": 0.85,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.8,
+      "signals": []
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.9,
+      "signals": [
+        "irreversible_data_loss"
+      ]
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.7,
+      "signals": []
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.95,
+      "signals": [
+        "payment_dispute",
+        "severe_anger"
+      ]
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.8,
+      "signals": [
+        "multi_intent"
+      ]
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.9,
+      "signals": [
+        "irreversible_data_loss"
+      ]
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.95,
+      "signals": [
+        "irreversible_data_loss"
+      ]
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.85,
+      "signals": [
+        "multi_intent"
+      ]
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.95,
+      "signals": [
+        "irreversible_data_loss",
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "not_actionable",
+      "confidence": 0.85,
+      "signals": [
+        "non_english"
+      ]
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.85,
+      "signals": [
+        "multi_intent"
+      ]
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.85,
+      "signals": [
+        "payment_dispute"
+      ]
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.8,
+      "signals": []
+    }
+  ]
+}

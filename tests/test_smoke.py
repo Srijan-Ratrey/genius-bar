@@ -550,3 +550,22 @@ def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
 
     md = (tmp_path / "reports" / "results.md").read_text()
     assert "Intent classification" in md and "Escalation" in md
+
+
+def test_models_that_reject_thinking_config_are_recognised():
+    """Every model actually used must be classified correctly.
+
+    Regression test: an earlier cleanup dropped gemini-3.5-flash-lite from this
+    list as unused. It later became the judge, and the eval run died on
+    400 INVALID_ARGUMENT partway through. A predicate covering the whole Gemma
+    family stops the next variant repeating it.
+    """
+    assert not llm._supports_thinking("gemini-3.5-flash-lite")
+    assert not llm._supports_thinking("gemma-4-26b-a4b-it")
+    assert not llm._supports_thinking("gemma-4-31b-it")
+    assert llm._supports_thinking("gemini-3.5-flash")
+    assert llm._supports_thinking("gemini-3.1-flash-lite")
+
+    # Every model this project actually calls must be handled, not just known.
+    for model in (llm.PRIMARY, llm.JUDGE, llm.SUGGEST, llm.ALT_JUDGE):
+        llm._supports_thinking(model)  # must not raise

@@ -1,0 +1,147 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: since update to iOS 11.0.2, I must to reboot my iPhone 6S to make a call, and it run very slow with a huge battery drain. I'm bored ! What happen if I must make emergency call ?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 2 ---\n  customer wrote: my iPhone 6s Plus isn’t making alert sounds anymore. Do not disturb is off. Any ideas about a solution?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 3 ---\n  customer wrote: I hate how my photos keep disappearing. I never know how to get them back. It says they're still taking up storage. So where?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 4 ---\n  customer wrote: I cant access to imessage in an iPad. I have a new apple ID. what's wrong?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 5 ---\n  customer wrote: okay apple 🍎 what is the latest update done to our phones - hugely reduced battery life-rebooting constantly ... what is going on ?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 6 ---\n  customer wrote: Thanks to pushing out High Sierra and it not being compatible with OWC HD’s.. I just lost all saved data on my MB Pro!\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 7 ---\n  customer wrote: Why does the letter “eye” keep autocorrecting to this I️ #TF\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 8 ---\n  customer wrote: If I trade in my iPhone with Apple, is it possible that I can use the credit/gift card to pay part of the battery replacement fee of my MacBook?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 9 ---\n  customer wrote: ever since I updated my iPhone today it freezes at least once an hour and I have to force restart it every time, so what’s up..?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 10 ---\n  customer wrote: money has been debited by itune..don’t know why??..plz..refund it immediately\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 11 ---\n  customer wrote: I think I missed my return window...🤣 #softwarefail\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 12 ---\n  customer wrote: I need to cancel a subscription but when I tap my Apple ID, this happens! Can you help?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 13 ---\n  customer wrote: , what’s with the I️ issue???\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 14 ---\n  customer wrote: Dear PLEASE fix this it’s driving me insane.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 15 ---\n  customer wrote: why the fuck am i still seeing boxes n question marks\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for missing photos"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for data loss"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for a billing and trade-in question"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for a unauthorized debit / refund request"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for a return window joke"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises future software update without precedent"
+    }
+  ]
+}

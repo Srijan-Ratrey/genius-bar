@@ -1,0 +1,223 @@
+{
+  "model": "gemini-3.5-flash",
+  "prompt": "You are triaging opening messages sent to Apple's support account on Twitter.\n\nFor each message return the single best intent, a calibrated confidence, and any\nrisk signals genuinely present.\n\nINTENTS (use exactly one of these names):\n- update_performance: Battery drain, freezing, slowdown or lag that began after a software update. The dominant complaint in this corpus by a wide margin.\n- app_or_service_issue: A named app or Apple service misbehaving -- App Store, iCloud, Apple Music, iTunes, Safari, iMessage, Mail, sync. Includes questions about how to use a specific service, since those share a resolution path.\n- autocorrect_bug: The iOS 11 keyboard defect that replaced the letter \"I\" with a symbol or question-mark box. One known bug with one known fix.\n- hardware_repair: Physical failure, damage, warranty and repair entitlement, or frustration at repeated repairs. Involves money and a service commitment.\n- device_crash_reboot: Device restarting on its own, refusing to power on, or overheating. Kept separate from update_performance because overheating is a safety matter.\n- account_billing: Purchases, subscriptions, refunds, unauthorised charges, iTunes credit, and locked accounts. Rare but never safe to auto-answer.\n- data_loss: Photos, contacts, music, notes or messages missing, or a backup found to be absent. Rare, and often irreversible by the time the customer tweets.\n- not_actionable: No answerable request: venting, insults, jokes, feature requests, and commentary on Apple as a company. A legitimate category, not noise -- forcing these into a support intent produces confidently irrelevant troubleshooting.\n\nRISK SIGNALS (include only those actually present; an empty list is normal):\n- legal_or_press_threat: threatens legal action, regulators, or media\n- safety_risk: device overheating, burning, swelling, or physical harm\n- payment_dispute: disputed, unauthorised or duplicate charge; demands a refund\n- irreversible_data_loss: data appears permanently lost, with no backup\n- repeat_contact: says they have already asked, or already tried the usual advice\n- non_english: written mainly in a language other than English\n- multi_intent: contains two or more unrelated requests\n- severe_anger: sustained abuse or profanity directed at the brand\n\nGuidance:\n- Judge what the customer NEEDS, not how politely they said it. An furious\n  \"iOS 11 RUINED MY PHONE FIX IT\" is still update_performance; the anger is a\n  separate signal, not a different intent.\n- not_actionable means there is nothing to answer -- venting, jokes, feature\n  requests. Do not use it merely because the message is rude.\n- confidence should be genuinely calibrated. These categories overlap and many\n  messages are ambiguous; report ~0.5 when torn rather than defaulting high.\n  Low confidence is useful information, not a failure.\n\nReturn one object per message, in order.\n\nMESSAGES:\n1. iTunes just deleted 1,300+ songs from my library.... wtf! 🤬🤬🤬 thanks\n2. Phones been charging for an hour and it’s went from 10% to 4% — why is suddenly turning into trash\n3. ever since your latest iso update my 7+ keeps freezing, apps won’t load or freeze when they do, I’ve lost names to some of my contacts, and it’s generally running crap. I’ve done all your little updates since then but they have done nothing to fix my issues!\n4. my phone keeps taking off iMessage and FaceTime I️ need help and I️ tried everything 😤\n5. Full software reboot I lost everything!!! #annoyed\n6. Hey could you make it more impossible and frustrating to get a Genius Bar Reservation for an elderly person? Ridiculous.\n7. how do I know if l my phones covered with AppleCare\n8. Your \"State of the art\" iPhone deleted my card bracts and messages.\n9. Almost had a panic attack when most of my photos disappeared after I hard reset my iPhone 8 (was having auto-lock issues.) Good news: they all came back but bad news: they’re all out of order in a Camera Roll 😤\n10. Vaya cagada, el adaptador de auriculares no funciona correctamente con unos QuietComfort® 20 de 250€, se corta el sonido. Ninguna solucion en la Apple store, solo comprar otro adaptador. Comprar un móvil de mas de 1000€ y tener estos problemas 😡😡😡😡😡😡😡\n11. so annoyed, i replaced my headphones three days ago and they don't work. i go back and wait and you guys gave me the old earpods\n12. Is the Apple repair status page broken? I've been seeing this 403 error since midday yesterday.\n13. - Apple watches are crashing and restarting when you ask Siri for the weather. What gives? #AppleWatch #Apple\n14. all of my apps (including Twitter) either open to logo screen &amp; crash before opening or open &amp; freeze. iPhone 7 on iOS 11.1.2. Tried restarting and rebooting multiple times but problem persists. Is there a quick fix or do I need to take my phone in for repair?\n15. what the fuck is going on with my phone every time I️ press my “I️” something’s else comes up\n16. Con iOS 11.0.2 arreglan errores, pero el teclado sigue siendo extremadamente lento cc\n17. It would really be great if iTunes got ANYTHING right when importing new music to its library. sucks more and more with every update.\n18. Bro what's up with the question mark box big thing? why does it look like this?\n19. can you help me with my nan to find her email address for ICloud as she’s lost all of her photos and she’s really really upset about it 😭\n20. #techhelp! My MacBook Pro will NOT let me login this am. I enter password, black error message appears on top, then it reboots self. Anyone?\n21. Excellent job from - \"We will charge you £207 for a £159 set of AirPods that have failed under warranty\" and I've now been cut off twice while they go an investigate why they are being so stupid.\n22. all these updates ruined my phone, wow. So slow, crashes everytime. Freezes &amp; overheats. Still not getting an android though\n23. Apple Music is down, right as released their sophomore album. Not a coincidence.\n24. Hi i cant download instagram from my app store? HelP\n25. it’s time to fix your software ! My iPhone 6´s keyboard is terribly slow and even the software I doubt its a way to sell the iPhone x\n26. WTF? I can’t use my BRAND NEW IPAD more than 10 minutes without it overheating! Come on people. Fix this $hit #ios1103 sucks too\n27. It’s not a good service when we keep lose data because you’re fucking up!! I need to repair my apple watch 1 without reseting and losing data!\n28. I accidentally bought a $50 apple store card through email instead of iTunes card. Is there a way I could replace/return it?\n29. what is up with the iPhone keyboards? Every time the letter I️ is used alone. Something else pops up 🙄 #FIXIT\n30. please help?😅قبل لا انجلط\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "intent": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0.0-1.0"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "legal_or_press_threat",
+              "safety_risk",
+              "payment_dispute",
+              "irreversible_data_loss",
+              "repeat_contact",
+              "non_english",
+              "multi_intent",
+              "severe_anger"
+            ]
+          },
+          "description": "only signals genuinely present"
+        }
+      },
+      "required": [
+        "intent",
+        "confidence",
+        "signals"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "intent": "data_loss",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.7,
+      "signals": []
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.95,
+      "signals": [
+        "repeat_contact",
+        "multi_intent"
+      ]
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.9,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.95,
+      "signals": [
+        "irreversible_data_loss"
+      ]
+    },
+    {
+      "intent": "not_actionable",
+      "confidence": 0.85,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "data_loss",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.6,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.9,
+      "signals": [
+        "non_english"
+      ]
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.85,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.8,
+      "signals": []
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.9,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.98,
+      "signals": [
+        "severe_anger"
+      ]
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.9,
+      "signals": [
+        "non_english"
+      ]
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.85,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.98,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.75,
+      "signals": [
+        "irreversible_data_loss"
+      ]
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.9,
+      "signals": [
+        "repeat_contact"
+      ]
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.85,
+      "signals": [
+        "safety_risk"
+      ]
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "app_or_service_issue",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "update_performance",
+      "confidence": 0.9,
+      "signals": []
+    },
+    {
+      "intent": "device_crash_reboot",
+      "confidence": 0.9,
+      "signals": [
+        "safety_risk"
+      ]
+    },
+    {
+      "intent": "hardware_repair",
+      "confidence": 0.8,
+      "signals": [
+        "multi_intent"
+      ]
+    },
+    {
+      "intent": "account_billing",
+      "confidence": 0.95,
+      "signals": []
+    },
+    {
+      "intent": "autocorrect_bug",
+      "confidence": 0.98,
+      "signals": []
+    },
+    {
+      "intent": "not_actionable",
+      "confidence": 0.7,
+      "signals": [
+        "non_english"
+      ]
+    }
+  ]
+}

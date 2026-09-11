@@ -1,0 +1,63 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: I think I missed my return window...🤣 #softwarefail\n  proposed reply: If you need to explore your return or refund options, you'll find more info on our policy here: [support link]\n  precedent available to the drafter:\n      1. customer: If i return new product , iphone , you refund full money , or what ?\n         Apple replied: Let's get you over to our Sales Support team who can help answer any questions you have about returning your iPhone. They'll be the best ones to look into your available options. Just follow this link to get to them: [su\n      2. customer: Game Center to ever return to iOS?\n         Apple replied: Great question. While there is no longer a standalone app for Game Center, it remains possible to sign into Game Center from within the Settings app, and (depending on the app), you can track your Game Center stats in ea\n      3. customer: I think its iOS 11.0\n         Apple replied: Please make sure your iPad is backed up, then try updating to 11.0.3. Please let us know if that doesn't resolve the issue!\n      4. customer: My phone suddenly stopped ringing today. I’ve missed 4 calls, ringer is on and turned up, and phone app still notifies me of a missed call. Several colleagues report the \n         Apple replied: Thanks for reaching out to us. We're here to help. Are you experiencing the missing calls notifications on every call. Does the issue persist after a restart?\n      5. customer: Just got the email denying my rebate on my 6s purchased on Black Friday. I will return it the store. Please set up a return for me. As was not clear in had to be space gr\n         Apple replied: If you need to explore your return or refund options, you'll find more info on our policy here: [support link]\n\n--- REPLY 2 ---\n  customer wrote: , what’s with the I️ issue???\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      1. customer: , what’s with the I️ issue???\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      2. customer: Please fix the I️ issue.\n         Apple replied: iOS We're here for you. 11.1.2 was recently released and it includes a fix for autocorrect issues. Be sure to back up your device prior to updating, and let us know if the issue persists afterwards. How to back up: [supp\n      3. customer: I️ I️ I️ I️THIS IS THE ISSUE\n         Apple replied: An update has been released to assist with this issue. If you haven’t yet, please back up your device and update it to iOS 11.1.1. For more info, check out: [support link]\n      4. customer: This is my 3rd times with the issue.\n         Apple replied: Thanks. You stated the restart helped. Does it seem to be working now?\n      5. customer: fix the I issue already\n         Apple replied: We recently released an iOS update, 11.1.1, that contains a fix for autocorrect issues. Let’s be sure to back up your device prior to updating. How to back up: [support link] If you're seeing the issue from others, they \n\n--- REPLY 3 ---\n  customer wrote: Dear PLEASE fix this it’s driving me insane.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      1. customer: my phone has portrait lock enabled but will rotate horizontally anyway. pls fix this it’s driving me insane.\n         Apple replied: Thanks for reaching out. We can definitely look into this with you. Which iOS are you running currently? You can go to Settings &gt; General &gt; About to locate the version.\n      2. customer: Dear , Please fix this! [image]\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      3. customer: FIX THIS FUCKING BUG IT IS DRIVING ME INSANE. Look I️ I️ I️ I️ I️\n         Apple replied: Of course! We can definitely help you with this today! Have you had a chance to update your iOS yet? If not, go ahead and create a backup first, then update your iOS under Settings &gt; General &gt; Software Update. Let \n      4. customer: please fix this I️\n         Apple replied: Here's what you can do to work around this issue until it's fixed in a future software update: [support link]\n      5. customer: please fix this 👉🏽 I️ I️ I️ I️\n         Apple replied: iOS 11.1.1 was recently released and it includes a fix for autocorrect issues. Be sure to back up your device prior to updating, and let us know if the issue persists afterwards. How to back up: [support link]\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 0,
+      "worst_problem": "over-promises a fix in a future update"
+    }
+  ]
+}

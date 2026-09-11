@@ -1,0 +1,147 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: Worst exp w/ iPhone X. Hardware failure. No ETA on replacement. disconnects me &amp; AT&amp;T no help getting old phone working. 😡\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 2 ---\n  customer wrote: all my photos and videos from all my concerts got deleted off icloud drive but the pictures of me and someone i don’t associate myself w anymore are still on there 🤔 fix this b\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 3 ---\n  customer wrote: My contacts have disappeared! Why?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 4 ---\n  customer wrote: what is going on with this last update! All of our phones going crazy. Freezing, rebooting, moving slowly...\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 5 ---\n  customer wrote: Dear , for the 2nd time in 10 Days all my photos have disappeared except for 12 from 3 years ago.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 6 ---\n  customer wrote: your new update is god awful and fucked up my phone 😤😤😤\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 7 ---\n  customer wrote: Wtf is wrong with typing the letter I️\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 8 ---\n  customer wrote: cuando la app MAPAS va a permitir navegar en Latinoamérica dándote indicaciones? Uno se compra el #APPLECARPLAY para usarlo y solo vez un mapa en movimiento sin indicaciones... ósea no sirve! para esto liberen #WAZE hasta q este habilitado! #PERU\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 9 ---\n  customer wrote: Hi! Is my Match music covered by an subscription? That is, can I let my iTunes Match subscription lapse and have the same access to that music in my Apple Music subscription? Uploaded songs, etc.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 10 ---\n  customer wrote: why can’t I️ type the letter I️ ??\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 11 ---\n  customer wrote: Working on My #MacBookPro and just witnessed the screen crack....bizarre! Is this a thing? ? It’s 3 years 2 months old. #beforemyeyes #isitacrack? #pleasedontbebroken\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 12 ---\n  customer wrote: Just wondering two things: 1 - Why are movies that I *DIDN’T* purchase showing up in my iTunes? 2 - Why do I now have duplicates of movies that I *DID* purchase? Please help.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 13 ---\n  customer wrote: been trying to update my apps on the AppStore and it keeps asking me to update my billing info.My details haven’t changed HELP\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 14 ---\n  customer wrote: can I get a refund for #iPhone7Plus ?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 15 ---\n  customer wrote: Just got locked out from iPhone because my passcode stopped working. I have been typing it for a year, at least once per day, and I am...\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "hallucinates a fix and update for a hardware issue"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "inappropriate generic template for deleted photos"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "hallucinates a software update fix for disappeared contacts"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 3,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "hallucinates a future software update for freezing phones"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "uses canned template ignoring photo loss"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant canned fix for an angry customer"
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response to a feature request"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant template for an Apple Music subscription question"
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "hallucinates software fix for a physical screen crack"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response about updates for iTunes movie issues"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant canned response for a billing issue"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant template for a refund request"
+    },
+    {
+      "groundedness": 1,
+      "helpfulness": 1,
+      "tone": 1,
+      "safety": 1,
+      "worst_problem": "irrelevant template for a locked passcode issue"
+    }
+  ]
+}

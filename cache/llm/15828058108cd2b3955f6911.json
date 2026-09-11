@@ -1,0 +1,63 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: why the fuck am i still seeing boxes n question marks\n  proposed reply: We'd love to help! Are you seeing this when you type, or when you read what others type?\n  precedent available to the drafter:\n      1. customer: I️ updated my iPhone 7 to the latest update and I️ am still seeing small boxes with question marks in them! Why?\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      2. customer: I did the new update and I’m still seeing boxes with question marks. 😤 is anyone else or just me 😫\n         Apple replied: We'd love to help! Are you seeing this when you type, or when you read what others type?\n      3. customer: WHY AM I STILL SEEING THE BOX WITH THE QUESTION MARK AS EMOJIS 😤😤😤😤😤\n         Apple replied: We understand wanting that fixed! Have a look at this article and see if it helps: [support link]\n      4. customer: Why am I still seeing the A and question mark in a box. fix this shit\n         Apple replied: We'd be glad to be of assistance. We have addressed this issue in our recent iOS update: [support link]\n      5. customer: I’m still seeing black question marks even though my phone is updated¿\n         Apple replied: Hi there. Is this what other people are writing or what you are writing? [support link]\n\n--- REPLY 2 ---\n  customer wrote: My iPhone has been ridiculously slow and freezing and glitching like can y’all relax on me\n  proposed reply: We can look into this issue together. Which exact iOS version did you update your device to? You can check this through Settings > General > About.\n  precedent available to the drafter:\n      1. customer: My iPhone has been messing up since I️ updated it!\n         Apple replied: We'd love to help you with the trouble you're having! Which version of iOS 11 are you currently updated to? What exactly is happening?\n      2. customer: i’m not mad but can you just tell me why my i️ keeps glitching like this\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link] [support link]\n      3. customer: Ok my iPhone 7 has been freezing at least 2 times a day. Don’t make me switch to Android.\n         Apple replied: We'd be happy to look into what's going on. Which version of iOS are you running?\n      4. customer: Updated my phone and suddenly it’s glitching like crazy, closing out of apps, and being extremely slow. Thanks 😭\n         Apple replied: We can look into this issue together. Which exact iOS version did you update your device to? You can check this through Settings &gt; General &gt; About.\n      5. customer: So....my iPhone X has been like this for hours it dosen t read my touch at all Ughhh whats going on [image]\n         Apple replied: Let's get this sorted out. Please check out [support link] Let us know if further assistance is needed.\n\n--- REPLY 3 ---\n  customer wrote: - Hi, I get error message as below everytime I open ITunes, please help me fix my problem.\n  proposed reply: We want to help you with this. Let's start off with some information about your device. Are you using a Mac or PC? Does it return after you restart your computer and reopen iTunes?\n  precedent available to the drafter:\n      1. customer: - Hi, I get error message as below everytime I open ITunes, please help me fix my problem. [image]\n         Apple replied: We want to help you with this. Let's start off with some information about your device. Are you using a Mac or PC? Does it return after you restart your computer and reopen iTunes?\n      2. customer: help me fix my back camera 😭😭😭😭😭#iOSProblem [image]\n         Apple replied: Thank you for contacting us for support. We definitely want to make sure you can use your camera at anytime! Let's look at this together. Could you tell us which Apple device you're using? In the meantime, here's a great\n      3. customer: please help me??? [image]\n         Apple replied: We want to help you delete the unwanted user. You'll find the steps to do so here: [support link]\n      4. customer: please fix my I’s\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      5. customer: please help me i need somebody help\n         Apple replied: We're here for you! Can you tell us more about what you need assistance with?\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    }
+  ]
+}

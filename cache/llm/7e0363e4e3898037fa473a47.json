@@ -1,0 +1,56 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: dude....11.1.....what's the deal? Tired of reading question marks in a box 😏\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      1. customer: dude....11.1.....what's the deal? Tired of reading question marks in a box 😏\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      2. customer: upgraded to 11.0.2 now crashes. What’s the deal?\n         Apple replied: Hey, we can offer some guidance. For help with an app you've installed, please take a look here: [support link]\n      3. customer: wtf dude [image]\n         Apple replied: Are you seeing this issue happening when viewing other people's posts or messages, or is this happening when you're typing your own?\n      4. customer: the fuck dude\n         Apple replied: We want to help. First, we'd suggest following the steps here to resolve the issue: [support link] If you need further assistance, let us know.\n      5. customer: Apple needs to do something about this glitch.. I’m tired of seeing question marks!!!\n         Apple replied: An update has been released to assist with this issue. If you haven’t yet, please back up your device and update it to iOS 11.1.1. For more info, check out: [support link]\n\n--- REPLY 2 ---\n  customer wrote: i reset all settings and now my phone wont let me put ME as me (in the contacts) and I can't give it a background at all\n  proposed reply: We want to help! Which iPhone model do you have? Have you tried these steps already? [support link]\n  precedent available to the drafter:\n      1. customer: but how can I when it wont let me on my phone! Had no phone since Friday now.. Such a joke! (2/2)\n         Apple replied: We'd like to make sure you get to the right place for help with this. To get started, please connect with our Account Security team here: [support link]\n      2. customer: i want to factory reset my phone but it won’t let me as i have forgotten my restriction password. It there anyway i can reset it without the password??\n         Apple replied: Hello there. We'd be glad to provide you with some information on how to accomplish this. You'll want to restore your iPhone via recovery mode as mentioned in this article: [support link]\n      3. customer: I updated my phone to your stupid update and now my phone wont turn on\n         Apple replied: Understood. We want to help! Which iPhone model do you have? Have you tried these steps already? [support link]\n      4. customer: I am so frustrated. It wouldn’t let me in the app to preorder. What do I do now? [image]\n         Apple replied: Thanks for reaching out. Our Online Store team can help with your order here: [support link]\n      5. customer: my phone won't let me update ☹️☹️☹️\n         Apple replied: We're here for you. Try these steps: [support link] Let us know if you have questions.\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    }
+  ]
+}

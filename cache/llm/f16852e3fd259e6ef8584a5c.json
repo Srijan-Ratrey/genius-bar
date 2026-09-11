@@ -1,0 +1,49 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: OS X High Sierra 10.13.1 keeps losing wireless internet access after waking up. Reboot seems to fix, but is most inconvenient. MBP 2012. Any ETA on a fix?\n  proposed reply: We'd love to look into this with you and help prevent this unexpected Wi-Fi behavior on wake from occurring. Let us know if the steps in this guide help with this behavior: [support link]\n  precedent available to the drafter:\n      1. customer: OS X High Sierra 10.13.1 keeps losing wireless internet access after waking up. Reboot seems to fix, but is most inconvenient. MBP 2012. Any ETA on a fix?\n         Apple replied: We'd love to look into this with you and help prevent this unexpected Wi-Fi behavior on wake from occurring. Let us know if the steps in this guide under the section titled, \"If the previous steps don't work\" help with t\n      2. customer: Macbook Air and High Sierra 10.13.1\n         Apple replied: Thanks. Does this persist after you restart your Mac? Is it only happening with specific applications, or all apps? Also, if you quit the app, does the icon reappear?\n      3. customer: ETA on an OS update? [image]\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      4. customer: what happened to airdrop on mac OS high sierra?\n         Apple replied: We want to help. Can you tell us more about what you are experiencing? Here's how to use AirDrop: [support link]\n      5. customer: my MBP 2017 can’t find the supplemental update just released. I’m running MacOS 10.13 (17A362a). Any help?\n         Apple replied: Happy to help. Are you attempting to update from our website here?: [support link] Also, are you getting an error?\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    }
+  ]
+}

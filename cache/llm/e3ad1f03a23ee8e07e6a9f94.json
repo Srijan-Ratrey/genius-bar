@@ -1,0 +1,56 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: Iphone iOS 11.1.1 is horrible. Battery runs flat in 4 hours Crappy software and seriously dissapointing!!!! What's the solution you are offering??????? #notahappycustomer\n  proposed reply: Hi. We'd like to help. Check out these tips to maximize your battery life: [support link] Let us know if it helps.\n  precedent available to the drafter:\n      1. customer: my phone battery is horrible...\n         Apple replied: Hi. We'd like to help. Check out these tips to maximize your battery life: [support link] Let us know if it helps.\n      2. customer: iOS 11 is draining my battery something horrible. Fix fast.\n         Apple replied: We'd like to help. Can you tell us which version of iOS is installed in Settings &gt; General &gt; About?\n      3. customer: please fix this iOS 11 update ... this is horrible 😡 Still killing my battery life #goingbacktoandroid\n         Apple replied: You’re in the right spot for help. Can you tell us what model iPhone you're using?\n      4. customer: Horrible ese iOS 11.0.2 !! 😐\n         Apple replied: We offer support via Twitter in English. Get help in Spanish here: [support link] or join [support link]\n      5. customer: iOS 11.0.3\n         Apple replied: Are you using the built-in keyboard? If so, does toggling Auto-Correct off, then on in Settings &gt; General &gt; Keyboard, help?\n\n--- REPLY 2 ---\n  customer wrote: I fixed the stupid glitch on my keyboard but it happened so much before that it’s now coming up as a suggestion. Pls stop.\n  proposed reply: An update has been released to assist with this issue. If you haven’t yet, please back up your device and update it to iOS 11.1.1. For more info, check out: [support link]\n  precedent available to the drafter:\n      1. customer: I fixed the stupid glitch on my keyboard but it happened so much before that it’s now coming up as a suggestion. Pls stop. [image]\n         Apple replied: An update has been released to assist with this issue. If you haven’t yet, please back up your device and update it to iOS 11.1.1. For more info, check out: [support link]\n      2. customer: my keyboard is malfunctioning:/\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      3. customer: I️ also hate this stupid glitch when’s it getting fixed 😤\n         Apple replied: We want to help. Have you tried the latest update? Make sure you back up your iPhone using these steps: [support link] Then complete the update.\n      4. customer: I don’t know if it’s just my iPhone 8 but it lags &amp; freezes so much! 😡\n         Apple replied: We're here for you. What version of the iOS are you running? You can check by tapping on Settings &gt; General &gt; About.\n      5. customer: Why is my IPhone glitching so much lately?\n         Apple replied: We'd love to help. Could you provide us a few more details? Which iPhone do you carry and which iOS does it have installed?\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    },
+    {
+      "groundedness": 5,
+      "helpfulness": 5,
+      "tone": 5,
+      "safety": 5,
+      "worst_problem": ""
+    }
+  ]
+}

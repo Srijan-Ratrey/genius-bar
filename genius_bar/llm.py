@@ -72,8 +72,16 @@ EMBED_DIM = 768
 # clustering -- see DECISIONS.md.
 EMBED_BATCH = 80
 
-# Models that reject a thinking_config outright.
-NO_THINKING_CONFIG = {"gemma-4-31b-it"}
+# Models that reject a thinking_config outright, returning 400 INVALID_ARGUMENT.
+# A predicate rather than a bare set: every Gemma refuses it, so listing them
+# individually means the next Gemma variant breaks on first use. An earlier
+# cleanup removed gemini-3.5-flash-lite from this list as "a model never used";
+# it later became the judge and broke the eval run.
+NO_THINKING_CONFIG = {"gemini-3.5-flash-lite", "gemini-3.5-flash-image"}
+
+
+def _supports_thinking(model: str) -> bool:
+    return not (model.startswith("gemma") or model in NO_THINKING_CONFIG)
 
 # Spacing between live calls, to stay under the per-minute cap. Only applies on
 # cache misses, so a cached replay is unaffected. Embeddings get their own
@@ -230,7 +238,7 @@ def _parse_json(raw: str) -> Any:
 def _call_gemini(prompt: str, model: str, schema: dict | None, thinking: int | None) -> str:
     client = _get_client()
     config: dict[str, Any] = {"temperature": 0.0}  # determinism: the cache must be repeatable
-    if thinking is not None and model not in NO_THINKING_CONFIG:
+    if thinking is not None and _supports_thinking(model):
         config["thinking_config"] = {"thinking_budget": thinking}
     if schema is not None:
         config["response_mime_type"] = "application/json"
