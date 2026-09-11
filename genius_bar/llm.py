@@ -24,6 +24,7 @@ from __future__ import annotations
 import atexit
 import hashlib
 import json
+import logging
 import os
 import re
 import sys
@@ -139,6 +140,11 @@ def _get_client():
                 "only committed cache entries (`make eval`)."
             )
         from google import genai
+
+        # The SDK logs a WARNING about automatic function calling on every
+        # generate_content call. We pass no tools, so it never applies -- and it
+        # dumps a paragraph into the middle of the interactive labelling TUI.
+        logging.getLogger("google_genai.models").setLevel(logging.ERROR)
 
         # attempts=1 disables the SDK's internal 429 retry. Left on, it retries
         # underneath this module -- so the backoff here never sees the first
