@@ -31,18 +31,21 @@ from genius_bar import llm
 # Scored 1-5 each. Wording is deliberately concrete: "reasonable" invites a
 # judge to average everything to 3.
 RUBRIC = {
+    "addresses_this_message": (
+        "Is this reply written for THIS customer's specific problem, or is it "
+        "interchangeable boilerplate? "
+        "5 = names the actual problem and could not be sent to a different "
+        "customer unchanged. "
+        "3 = on-topic but generic; would fit any message in this category. "
+        "1 = could be pasted under almost any complaint, or answers a different "
+        "problem than the one asked about."
+    ),
     "groundedness": (
-        "Does the reply claim ONLY things the precedent supports? "
+        "Does the reply claim ONLY what the precedent supports? "
         "5 = every specific (setting, step, version, link) traces to the precedent. "
         "3 = generally consistent but adds unsupported detail. "
-        "1 = invents specifics Apple never said, e.g. a version number, a "
-        "timeline, a refund, or a promise that a fix is coming."
-    ),
-    "helpfulness": (
-        "Does it move this customer forward? "
-        "5 = a clear next step or the one diagnostic question that unblocks them. "
-        "3 = relevant but vague. "
-        "1 = generic sympathy with no next step, or answers a different problem."
+        "1 = invents specifics Apple never said -- a version number, a timeline, "
+        "a refund, or a promise that a fix is coming."
     ),
     "tone": (
         "Apple's public register: calm, plain, first person plural. "
@@ -63,13 +66,26 @@ RUBRIC = {
 JUDGE_SCHEMA = {
     "type": "object",
     "properties": {
+        # Written FIRST, deliberately. Generation is autoregressive, so forcing
+        # a specific observation before any number makes the scores follow from
+        # a judgement instead of being emitted reflexively.
+        "justification": {
+            "type": "string",
+            "description": "One sentence naming the single most notable thing "
+                           "about this reply, good or bad. Be concrete.",
+        },
+        "interchangeable": {
+            "type": "boolean",
+            "description": "Could this exact reply be sent to a completely "
+                           "different customer message without anyone noticing?",
+        },
         **{k: {"type": "integer", "description": "1-5"} for k in RUBRIC},
         "worst_problem": {
             "type": "string",
             "description": "the single biggest flaw in one short phrase, or empty if none",
         },
     },
-    "required": [*RUBRIC, "worst_problem"],
+    "required": ["justification", "interchangeable", *RUBRIC, "worst_problem"],
 }
 
 
@@ -96,6 +112,17 @@ Score 1-5 on each criterion independently. Do not average them together, and do
 not let a well-written reply inflate its groundedness score.
 
 {criteria}
+
+CALIBRATION -- read this before scoring:
+- A 5 means you genuinely cannot improve it. Most competent replies are 3 or 4.
+- If you are about to give more than a quarter of these replies a 5, your scale
+  has collapsed and the scores are worthless for comparing systems.
+- Use 2 and 4. A reply that is fine but unremarkable is a 3, not a 5.
+- A fluent, polite, on-topic reply that could be sent to any customer in this
+  category is a 3 on addresses_this_message, NOT a 5, however well written.
+- Some of these replies were copied verbatim from Apple's own historical
+  answers to OTHER customers. Those will read perfectly and still deserve a low
+  addresses_this_message score when they do not fit this particular message.
 
 Important:
 - Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.
@@ -144,6 +171,12 @@ def judge_replies(
             continue
         clean = {k: _clamp(scores.get(k)) for k in RUBRIC}
         clean["worst_problem"] = scores.get("worst_problem", "")
+        # Kept, not dropped: the justification is the raw material for failure
+        # analysis, and `interchangeable` is the sanity check on the judge
+        # itself -- the trivial baseline sends one identical reply to every
+        # customer, so a judge that never flags it is not reading the task.
+        clean["justification"] = scores.get("justification", "")
+        clean["interchangeable"] = bool(scores.get("interchangeable", False))
         clean["mean"] = sum(clean[k] for k in RUBRIC) / len(RUBRIC)
         out[idx] = clean
     return out

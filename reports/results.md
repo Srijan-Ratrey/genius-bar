@@ -30,17 +30,8 @@ Ratio = cost of a missed escalation vs a needless one. Lower is better.
 
 ## Reply quality (LLM judge, 1-5)
 
-| system | grounded | helpful | tone | safety | mean | drafted | ungrounded | >280 chars |
+| system | addresses th | groundedness | tone | safety | mean | interchangeable | drafted | ungrounded |
 |---|---|---|---|---|---|---|---|---|
-| trivial | 1.09 | 2.18 | 2.80 | 1.13 | 1.80 | 180 | 100.0% | 0 |
-| simple | 4.81 | 4.77 | 4.91 | 4.95 | 4.86 | 83 | 1.2% | 0 |
-| agent | 4.95 | 4.97 | 5.00 | 4.95 | 4.97 | 84 | 1.2% | 0 |
-
-## Cross-family judge check (Gemma vs Gemini)
-
-- n = 22
-- Spearman = undefined
-- Gemma is -0.22 vs Gemini
-
-Low correlation would mean much of the primary judge's score is
-family-specific taste rather than reply quality.
+| trivial | 1.27 | 1.00 | 2.88 | 1.36 | 1.62 | 100% | 180 | 100.0% |
+| simple | 3.86 | 4.42 | 4.49 | 4.91 | 4.42 | 30% | 83 | 1.2% |
+| agent | 4.53 | 5.00 | 5.00 | 5.00 | 4.88 | 10% | 84 | 1.2% |

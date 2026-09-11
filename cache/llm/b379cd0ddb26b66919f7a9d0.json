@@ -1,0 +1,187 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- addresses_this_message: Is this reply written for THIS customer's specific problem, or is it interchangeable boilerplate? 5 = names the actual problem and could not be sent to a different customer unchanged. 3 = on-topic but generic; would fit any message in this category. 1 = could be pasted under almost any complaint, or answers a different problem than the one asked about.\n- groundedness: Does the reply claim ONLY what the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said -- a version number, a timeline, a refund, or a promise that a fix is coming.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nCALIBRATION -- read this before scoring:\n- A 5 means you genuinely cannot improve it. Most competent replies are 3 or 4.\n- If you are about to give more than a quarter of these replies a 5, your scale\n  has collapsed and the scores are worthless for comparing systems.\n- Use 2 and 4. A reply that is fine but unremarkable is a 3, not a 5.\n- A fluent, polite, on-topic reply that could be sent to any customer in this\n  category is a 3 on addresses_this_message, NOT a 5, however well written.\n- Some of these replies were copied verbatim from Apple's own historical\n  answers to OTHER customers. Those will read perfectly and still deserve a low\n  addresses_this_message score when they do not fit this particular message.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: Worst exp w/ iPhone X. Hardware failure. No ETA on replacement. disconnects me &amp; AT&amp;T no help getting old phone working. 😡\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 2 ---\n  customer wrote: all my photos and videos from all my concerts got deleted off icloud drive but the pictures of me and someone i don’t associate myself w anymore are still on there 🤔 fix this b\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 3 ---\n  customer wrote: My contacts have disappeared! Why?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 4 ---\n  customer wrote: what is going on with this last update! All of our phones going crazy. Freezing, rebooting, moving slowly...\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 5 ---\n  customer wrote: Dear , for the 2nd time in 10 Days all my photos have disappeared except for 12 from 3 years ago.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 6 ---\n  customer wrote: your new update is god awful and fucked up my phone 😤😤😤\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 7 ---\n  customer wrote: Wtf is wrong with typing the letter I️\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 8 ---\n  customer wrote: cuando la app MAPAS va a permitir navegar en Latinoamérica dándote indicaciones? Uno se compra el #APPLECARPLAY para usarlo y solo vez un mapa en movimiento sin indicaciones... ósea no sirve! para esto liberen #WAZE hasta q este habilitado! #PERU\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 9 ---\n  customer wrote: Hi! Is my Match music covered by an subscription? That is, can I let my iTunes Match subscription lapse and have the same access to that music in my Apple Music subscription? Uploaded songs, etc.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 10 ---\n  customer wrote: why can’t I️ type the letter I️ ??\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 11 ---\n  customer wrote: Working on My #MacBookPro and just witnessed the screen crack....bizarre! Is this a thing? ? It’s 3 years 2 months old. #beforemyeyes #isitacrack? #pleasedontbebroken\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 12 ---\n  customer wrote: Just wondering two things: 1 - Why are movies that I *DIDN’T* purchase showing up in my iTunes? 2 - Why do I now have duplicates of movies that I *DID* purchase? Please help.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 13 ---\n  customer wrote: been trying to update my apps on the AppStore and it keeps asking me to update my billing info.My details haven’t changed HELP\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 14 ---\n  customer wrote: can I get a refund for #iPhone7Plus ?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 15 ---\n  customer wrote: Just got locked out from iPhone because my passcode stopped working. I have been typing it for a year, at least once per day, and I am...\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "justification": {
+          "type": "string",
+          "description": "One sentence naming the single most notable thing about this reply, good or bad. Be concrete."
+        },
+        "interchangeable": {
+          "type": "boolean",
+          "description": "Could this exact reply be sent to a completely different customer message without anyone noticing?"
+        },
+        "addresses_this_message": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "justification",
+        "interchangeable",
+        "addresses_this_message",
+        "groundedness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "justification": "This reply is a complete hallucination for a hardware failure complaint.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "promises a future software update for a hardware failure"
+    },
+    {
+      "justification": "This boilerplate response completely ignores the user's specific missing photos and privacy concerns.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "completely irrelevant canned response to a sensitive data issue"
+    },
+    {
+      "justification": "This generic reply matches a software bug scenario poorly for a sudden data loss complaint.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "uses a hardcoded template instead of addressing missing contacts"
+    },
+    {
+      "justification": "This template happens to fit an update complaint decently well.",
+      "interchangeable": true,
+      "addresses_this_message": 3,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises a future software update without precedent support"
+    },
+    {
+      "justification": "The canned response completely misses the severe photo disappearance issue.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "inappropriate generic reply to missing personal photos"
+    },
+    {
+      "justification": "This is a generic template matched well to an update complaint.",
+      "interchangeable": true,
+      "addresses_this_message": 3,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises a future software update without precedent"
+    },
+    {
+      "justification": "The template coincidentally matches the famous iOS 'I' bug update issue.",
+      "interchangeable": true,
+      "addresses_this_message": 3,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises an update fix without any supporting precedent"
+    },
+    {
+      "justification": "This canned response completely ignores a mapping feature request and regional complaint.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "irrelevant boilerplate sent to a regional feature request"
+    },
+    {
+      "justification": "This generic reply fails to answer any part of the specific iTunes Match subscription question.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "nonsensical template reply to a subscription billing question"
+    },
+    {
+      "justification": "The canned response happens to fit the known iOS typing bug.",
+      "interchangeable": true,
+      "addresses_this_message": 3,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 1,
+      "worst_problem": "promises an unsupported software fix timeline"
+    },
+    {
+      "justification": "This reply absurdly suggests a software update will fix a physical cracked screen.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "suggests a software update for a physical hardware crack"
+    },
+    {
+      "justification": "This boilerplate response is completely disconnected from unexpected iTunes purchases and duplicates.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "irrelevant template for an account and purchase issue"
+    },
+    {
+      "justification": "This generic response ignores billing and App Store issues entirely.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "fails to address billing info prompt loop"
+    },
+    {
+      "justification": "This template is completely inappropriate for a direct refund request.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "ignores refund inquiry with irrelevant bug boilerplate"
+    },
+    {
+      "justification": "This canned reply completely misses a critical device lockout and passcode problem.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 2,
+      "safety": 1,
+      "worst_problem": "useless template response to a passcode lockout"
+    }
+  ]
+}

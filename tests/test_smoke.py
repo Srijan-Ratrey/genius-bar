@@ -460,7 +460,8 @@ def test_report_rows_match_header_width_when_a_system_is_unjudged():
                                         "needless_escalations": 2,
                                         "cost_per_100": 10.0},
                            "cost_sweep": {"3:1": 1.0, "10:1": 2.0, "30:1": 3.0}},
-            "reply": {"n_drafted": 5, "ungrounded_rate": 0.1, "over_limit": 0, **scores},
+            "reply": {"n_drafted": 5, "ungrounded_rate": 0.1, "over_limit": 0,
+                      "interchangeable_rate": 0.2 if judged else None, **scores},
         }
 
     md = ev.build_report({
@@ -468,7 +469,11 @@ def test_report_rows_match_header_width_when_a_system_is_unjudged():
         "systems": {"trivial": block(False), "agent": block(True)},
     })
 
-    header = next(l for l in md.splitlines() if l.startswith("| system | grounded"))
+    # Located by section, not by column names: hardcoding the header is what
+    # let it silently mislabel every column when the rubric criteria changed.
+    lines = md.splitlines()
+    start = next(i for i, l in enumerate(lines) if l.startswith("## Reply quality"))
+    header = next(l for l in lines[start:] if l.startswith("| system |"))
     width = header.count("|")
     for line in md.splitlines():
         if line.startswith(("| trivial |", "| agent |")) and "%" in line:

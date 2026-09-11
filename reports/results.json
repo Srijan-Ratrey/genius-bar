@@ -377,17 +377,18 @@
         "n_judged": 90,
         "ungrounded_rate": 1.0,
         "over_limit": 0,
-        "groundedness": 1.0888888888888888,
-        "helpfulness": 2.1777777777777776,
-        "tone": 2.8,
-        "safety": 1.1333333333333333,
-        "mean": 1.8,
+        "addresses_this_message": 1.2666666666666666,
+        "groundedness": 1.0,
+        "tone": 2.8777777777777778,
+        "safety": 1.3555555555555556,
+        "mean": 1.625,
+        "interchangeable_rate": 1.0,
         "top_problems": {
-          "promises a future software update fix with no precedent": 12,
-          "promises future software update fix without precedent": 12,
-          "promises future software update without precedent": 10,
-          "promises future software update": 9,
-          "completely irrelevant to a billing dispute": 1
+          "promises a future software update fix without precedent": 15,
+          "blindly hallucinated fix promise": 15,
+          "promises a future software update fix without precedent supp": 1,
+          "completely boilerplate response.": 1,
+          "inappropriate for a data storage or missing photos question.": 1
         }
       }
     },
@@ -755,16 +756,18 @@
         "n_judged": 43,
         "ungrounded_rate": 0.012048192771084338,
         "over_limit": 0,
-        "groundedness": 4.813953488372093,
-        "helpfulness": 4.767441860465116,
-        "tone": 4.906976744186046,
-        "safety": 4.953488372093023,
-        "mean": 4.8604651162790695,
+        "addresses_this_message": 3.86046511627907,
+        "groundedness": 4.4186046511627906,
+        "tone": 4.488372093023256,
+        "safety": 4.906976744186046,
+        "mean": 4.4186046511627906,
+        "interchangeable_rate": 0.3023255813953488,
         "top_problems": {
-          "precedent doesn't match freezing camera symptoms for a facet": 1,
-          "asks about camera freezing instead of general phone freezing": 1,
-          "reply template mismatch for the user issue": 1,
-          "asks about a playlist when the customer asked about contacts": 1
+          "generic boilerplate response to a playful tweet": 1,
+          "vague link that misses the specific facetime complaint": 1,
+          "a bit generic for a vague complaint": 1,
+          "answers an entirely different bug than the one reported": 1,
+          "recommends an irrelevant update for a search bug": 1
         }
       }
     },
@@ -1131,28 +1134,21 @@
         "n_judged": 40,
         "ungrounded_rate": 0.011904761904761904,
         "over_limit": 0,
-        "groundedness": 4.95,
-        "helpfulness": 4.975,
+        "addresses_this_message": 4.525,
+        "groundedness": 5.0,
         "tone": 5.0,
-        "safety": 4.95,
-        "mean": 4.96875,
+        "safety": 5.0,
+        "mean": 4.88125,
+        "interchangeable_rate": 0.1,
         "top_problems": {
-          "adds unsupported version 11.1.1 not in precedent for this cu": 1
+          "slightly too generic for a unique complaint": 1,
+          "treats a built-in alarm issue like a third-party app": 1,
+          "a bit too boilerplate for an emotional plea": 1,
+          "slightly generic for an image-based complaint": 1
         }
       }
     }
   },
   "judge_agreement": null,
-  "self_consistency": null,
-  "cross_family": {
-    "n": 22,
-    "mean_human": 5.0,
-    "mean_judge": 4.784090909090909,
-    "judge_bias": -0.21590909090909083,
-    "within_1": 0.9545454545454546,
-    "exact_match": 0.7727272727272727,
-    "spearman": null,
-    "spearman_p": null,
-    "kappa_quadratic": 0.0
-  }
+  "self_consistency": null
 }
