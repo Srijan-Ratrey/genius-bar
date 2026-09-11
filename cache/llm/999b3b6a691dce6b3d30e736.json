@@ -1,0 +1,55 @@
+{
+  "model": "gemini-3.5-flash",
+  "prompt": "Draft Apple's next public reply to each customer message below.\n\nGround every draft in the precedent shown. That precedent is what Apple's\nsupport account ACTUALLY does, which is usually to ask one diagnostic question\nor point at one setting -- not to deliver a complete fix. Match that behaviour;\ndo not invent a more helpful Apple than the evidence supports.\n\nRules:\n- Under 280 characters. This is a public tweet.\n- Never invent specifics absent from the precedent: no version numbers, article\n  URLs, timelines, refunds or promises of a fix.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is not available here. You may say you will share a link; never fabricate one.\n- If the precedent shows Apple asking a diagnostic question first, ask it.\n- For intent not_actionable: acknowledge briefly and do not troubleshoot. Never\n  draft steps for a problem the customer did not report.\n- Match Apple's register: calm, plain, first person plural (\"we\"). Do not\n  mirror the customer's profanity or match their intensity.\n- used_evidence: 1-based indices of the examples you actually relied on. Empty\n  if none applied.\n\nReturn one object per message, in order.\n\n--- MESSAGE 1 ---\ncustomer: Apple Music is down, right as released their sophomore album. Not a coincidence.\nintent: app_or_service_issue\nhow Apple usually handles this: Apple typically asks which app and version, whether it reproduces after a sign-out/sign-in, and links the relevant support article.\nprecedent:\n    1. customer: Apple Music.\n       Apple replied: To be sure we provide accurate information, can you tell us which device you're using?\n    2. customer: apple music is trash af!! why do y’all keep charging me twice in a month???\n       Apple replied: We'd love to get you to the right place to look into this with you. Reach our iTunes Store team here: [support link]\n    3. customer: since the new IOS update my Iphone is really buggy and slow. Is this a coincidence? BTW My iPhone 6S is less than 9 months old. #coincidence #apple #techproblems\n       Apple replied: Let's look into this together. First, what's the exact iOS version you're running right now? You can find this at Settings &gt; General &gt; About. Then, let us know more about what is happening. The more detail you can provide, the better we'll be a\n    4. customer: So my Apple Music is not working. Im not able to search for music. I don't pay for things that don't work. What's going?\n       Apple replied: Let's get that Apple Music working for you again. What's happening when you try searching for music? Are you connected to cellular data or Wi-Fi when it fails to work correctly?\n    5. customer: Hi, brought two songs off an album a few weeks ago. Artist then released new album but iTunes not showing adjusted price, still asking for full price.\n       Apple replied: If you're having issues with an iTunes Store purchase, you'll be best supported by contacting our iTunes Store group at the following link: [support link]\n\n--- MESSAGE 2 ---\ncustomer: Hi i cant download instagram from my app store? HelP\nintent: app_or_service_issue\nhow Apple usually handles this: Apple typically asks which app and version, whether it reproduces after a sign-out/sign-in, and links the relevant support article.\nprecedent:\n    1. customer: Hi i cant download instagram from my app store? HelP\n       Apple replied: We'd love to help! What happens when you try to download the app? Do you get an error message?\n    2. customer: Why does my App Store do this? I can’t download anything [image]\n       Apple replied: We'd be happy to see what's going on when you try to install apps. If you double-click the side button, does your iPhone X respond on that screen at all? For more information, check this out: [support link]\n    3. customer: i cant download any games now Worst update ever i want my games [image]\n       Apple replied: Thanks for reaching out to us. We are always happy to help. What happens when you attempt to download games?\n    4. customer: Pretty sure I broke my app store lol i’m pretty upset i can’t download or update apps #iOS11 [image]\n       Apple replied: We want to be sure you can install updates. Please try loading the App Store with another network to see how things load up.\n    5. customer: What happened to my app???!!!!!!\n       Apple replied: We'd like to help you find out. Can you tell us more about what the issue is with this one app? We're here to help as much as possible. [support link]\n\n--- MESSAGE 3 ---\ncustomer: it’s time to fix your software ! My iPhone 6´s keyboard is terribly slow and even the software I doubt its a way to sell the iPhone x\nintent: update_performance\nhow Apple usually handles this: Historically Apple asks which iOS version, whether battery health is degraded, and directs to standard steps (restart, check Battery settings, update to the latest point release).\nprecedent:\n    1. customer: my keyboard is malfunctioning:/\n       Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n    2. customer: WHY IS MY $700 PHONE TWEAKIN BITCH YOUR SOFTWARE BASURA!!!!!! 🚮\n       Apple replied: Tell us what you're experiencing and we'll work together to have it worked out. [support link]\n    3. customer: I️ think it’s time to fix this. What’s taking so long?\n       Apple replied: iOS 11.1.1 was recently released and it includes a fix for autocorrect issues. Be sure to back up your device prior to updating, and let us know if the issue persists afterwards. How to back up: [support link]\n    4. customer: Does apple plan to sell full priced unlocked iphoneXs for preorders today?\n       Apple replied: Thanks for reaching us. For all questions regarding pre-orders, reach out to our Online Store here: [support link]\n    5. customer: the software updates have progressively made my software worse on my iPhone so???? Can y’all fix this or??\n       Apple replied: We want to help! What model of iOS device are you using? Do you have the most recent version of iOS 11.1.1 downloaded? What sort of issue are you having? [support link]\n\n--- MESSAGE 4 ---\ncustomer: what is up with the iPhone keyboards? Every time the letter I️ is used alone. Something else pops up 🙄 #FIXIT\nintent: autocorrect_bug\nhow Apple usually handles this: Fixed in iOS 11.1.1. Interim workaround was a Text Replacement entry mapping the broken glyph to \"I\".\nprecedent:\n    1. customer: what’s up with the I️?\n       Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n    2. customer: what’s up with the “I” turning into something else on everyone’s iPhones? Need to fix that fast !!!\n       Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link] [support link]\n    3. customer: wtf is up with this “ I️ “\n       Apple replied: Hello! Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n    4. customer: Aye wtf is up with the question mark glitch every time I️ write “I️” ?!?!?!\n       Apple replied: We've got you covered. We have a workaround that you might find to be helpful; let's give it a go: [support link]\n    5. customer: My predictive is waging war against my writing I️ every time I️ try to write I️ this shit I️ pops up... what is happening?\n       Apple replied: This issue was fixed in iOS 11.1.1. To update to the latest version of iOS, go to Settings &gt; General &gt; Software Update and tap Download and Install. Make sure to back up your iPhone first: [support link]\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "draft": {
+          "type": "string"
+        },
+        "used_evidence": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "1-based indices of the examples actually relied on"
+        }
+      },
+      "required": [
+        "draft",
+        "used_evidence"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "draft": "We'd love to help get Apple Music working for you. To be sure we provide accurate information, can you tell us which device you're using?",
+      "used_evidence": [
+        1
+      ]
+    },
+    {
+      "draft": "We'd love to help! What happens when you try to download the app? Do you get an error message?",
+      "used_evidence": [
+        1
+      ]
+    },
+    {
+      "draft": "We want to help! What model of iOS device are you using? Do you have the most recent version of iOS downloaded? What sort of issue are you having with the keyboard?",
+      "used_evidence": [
+        5
+      ]
+    },
+    {
+      "draft": "Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]",
+      "used_evidence": [
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}

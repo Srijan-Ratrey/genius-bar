@@ -1,0 +1,1158 @@
+{
+  "n": 180,
+  "n_blind": 60,
+  "n_assisted": 120,
+  "intents": [
+    "update_performance",
+    "app_or_service_issue",
+    "autocorrect_bug",
+    "hardware_repair",
+    "device_crash_reboot",
+    "account_billing",
+    "data_loss",
+    "not_actionable"
+  ],
+  "systems": {
+    "trivial": {
+      "intent": {
+        "balanced": {
+          "n": 180,
+          "accuracy": 0.18333333333333332,
+          "macro_f1": 0.03873239436619718,
+          "per_class_f1": {
+            "account_billing": 0.0,
+            "app_or_service_issue": 0.0,
+            "autocorrect_bug": 0.0,
+            "data_loss": 0.0,
+            "device_crash_reboot": 0.0,
+            "hardware_repair": 0.0,
+            "not_actionable": 0.0,
+            "update_performance": 0.30985915492957744
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              19
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              28
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              24
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              21
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              18
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              18
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              19
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              33
+            ]
+          ]
+        },
+        "weighted": {
+          "n": 180,
+          "accuracy": 0.3445627096088976,
+          "macro_f1": 0.06406594261957538,
+          "per_class_f1": {
+            "account_billing": 0.0,
+            "app_or_service_issue": 0.0,
+            "autocorrect_bug": 0.0,
+            "data_loss": 0.0,
+            "device_crash_reboot": 0.0,
+            "hardware_repair": 0.0,
+            "not_actionable": 0.0,
+            "update_performance": 0.512527540956603
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              19
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              28
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              24
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              21
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              18
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              18
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              19
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              33
+            ]
+          ]
+        },
+        "blind_only": {
+          "n": 60,
+          "accuracy": 0.18333333333333332,
+          "macro_f1": 0.03873239436619718,
+          "per_class_f1": {
+            "account_billing": 0.0,
+            "app_or_service_issue": 0.0,
+            "autocorrect_bug": 0.0,
+            "data_loss": 0.0,
+            "device_crash_reboot": 0.0,
+            "hardware_repair": 0.0,
+            "not_actionable": 0.0,
+            "update_performance": 0.30985915492957744
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              12
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              9
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              6
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              7
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              11
+            ]
+          ]
+        }
+      },
+      "escalation": {
+        "balanced": {
+          "n": 180,
+          "escalation_rate": 0.0,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "missed_escalations": 74,
+          "needless_escalations": 0,
+          "cost_per_100": 411.1111111111111
+        },
+        "weighted": {
+          "n": 180,
+          "escalation_rate": 0.0,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "missed_escalations": 74,
+          "needless_escalations": 0,
+          "cost_per_100": 411.1111111111111
+        },
+        "cost_sweep": {
+          "3:1": 123.33333333333333,
+          "10:1": 411.1111111111111,
+          "30:1": 1233.3333333333333
+        },
+        "missed_by_intent": {
+          "account_billing": 18,
+          "data_loss": 21,
+          "device_crash_reboot": 17,
+          "hardware_repair": 18
+        }
+      },
+      "reply": {
+        "n_drafted": 180,
+        "n_judged": 90,
+        "ungrounded_rate": 1.0,
+        "over_limit": 0,
+        "groundedness": 1.0888888888888888,
+        "helpfulness": 2.1777777777777776,
+        "tone": 2.8,
+        "safety": 1.1333333333333333,
+        "mean": 1.8,
+        "top_problems": {
+          "promises a future software update fix with no precedent": 12,
+          "promises future software update fix without precedent": 12,
+          "promises future software update without precedent": 10,
+          "promises future software update": 9,
+          "completely irrelevant to a billing dispute": 1
+        }
+      }
+    },
+    "simple": {
+      "intent": {
+        "balanced": {
+          "n": 180,
+          "accuracy": 0.6111111111111112,
+          "macro_f1": 0.5827061360715613,
+          "per_class_f1": {
+            "account_billing": 0.8292682926829268,
+            "app_or_service_issue": 0.6666666666666666,
+            "autocorrect_bug": 0.723404255319149,
+            "data_loss": 0.7441860465116279,
+            "device_crash_reboot": 0.7,
+            "hardware_repair": 0.5365853658536586,
+            "not_actionable": 0.0,
+            "update_performance": 0.46153846153846156
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              17,
+              0,
+              2,
+              0,
+              2,
+              0,
+              7
+            ],
+            [
+              0,
+              0,
+              17,
+              0,
+              0,
+              2,
+              0,
+              5
+            ],
+            [
+              1,
+              1,
+              0,
+              16,
+              1,
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              14,
+              1,
+              0,
+              2
+            ],
+            [
+              1,
+              1,
+              1,
+              0,
+              2,
+              11,
+              0,
+              2
+            ],
+            [
+              3,
+              0,
+              2,
+              2,
+              0,
+              2,
+              0,
+              10
+            ],
+            [
+              0,
+              2,
+              3,
+              2,
+              5,
+              3,
+              0,
+              18
+            ]
+          ]
+        },
+        "weighted": {
+          "n": 180,
+          "accuracy": 0.4714097172850393,
+          "macro_f1": 0.3988002142565332,
+          "per_class_f1": {
+            "account_billing": 0.7248233689405198,
+            "app_or_service_issue": 0.4079325298569223,
+            "autocorrect_bug": 0.5483147769487026,
+            "data_loss": 0.4189123354240139,
+            "device_crash_reboot": 0.27315439467633096,
+            "hardware_repair": 0.25139409452417955,
+            "not_actionable": 0.0,
+            "update_performance": 0.5658702136815965
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              17,
+              0,
+              2,
+              0,
+              2,
+              0,
+              7
+            ],
+            [
+              0,
+              0,
+              17,
+              0,
+              0,
+              2,
+              0,
+              5
+            ],
+            [
+              1,
+              1,
+              0,
+              16,
+              1,
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              14,
+              1,
+              0,
+              2
+            ],
+            [
+              1,
+              1,
+              1,
+              0,
+              2,
+              11,
+              0,
+              2
+            ],
+            [
+              3,
+              0,
+              2,
+              2,
+              0,
+              2,
+              0,
+              10
+            ],
+            [
+              0,
+              2,
+              3,
+              2,
+              5,
+              3,
+              0,
+              18
+            ]
+          ]
+        },
+        "blind_only": {
+          "n": 60,
+          "accuracy": 0.6,
+          "macro_f1": 0.5610802596096713,
+          "per_class_f1": {
+            "account_billing": 0.8235294117647058,
+            "app_or_service_issue": 0.5,
+            "autocorrect_bug": 0.8888888888888888,
+            "data_loss": 0.7692307692307693,
+            "device_crash_reboot": 0.5,
+            "hardware_repair": 0.5454545454545454,
+            "not_actionable": 0.0,
+            "update_performance": 0.46153846153846156
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              7,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              5,
+              0,
+              1,
+              0,
+              1,
+              0,
+              5
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              5,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              1,
+              3,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              3
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              3,
+              0,
+              0,
+              6
+            ]
+          ]
+        }
+      },
+      "escalation": {
+        "balanced": {
+          "n": 180,
+          "escalation_rate": 0.5388888888888889,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.6597938144329897,
+          "recall": 0.8648648648648649,
+          "f1": 0.7485380116959064,
+          "missed_escalations": 10,
+          "needless_escalations": 33,
+          "cost_per_100": 73.88888888888889
+        },
+        "weighted": {
+          "n": 180,
+          "escalation_rate": 0.5388888888888889,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.2288940670371034,
+          "recall": 0.2713368416338656,
+          "f1": 0.2483148967487317,
+          "missed_escalations": 10,
+          "needless_escalations": 33,
+          "cost_per_100": 73.88888888888889
+        },
+        "cost_sweep": {
+          "3:1": 35.0,
+          "10:1": 73.88888888888889,
+          "30:1": 185.0
+        },
+        "missed_by_intent": {
+          "account_billing": 1,
+          "data_loss": 2,
+          "device_crash_reboot": 3,
+          "hardware_repair": 4
+        }
+      },
+      "reply": {
+        "n_drafted": 83,
+        "n_judged": 43,
+        "ungrounded_rate": 0.012048192771084338,
+        "over_limit": 0,
+        "groundedness": 4.813953488372093,
+        "helpfulness": 4.767441860465116,
+        "tone": 4.906976744186046,
+        "safety": 4.953488372093023,
+        "mean": 4.8604651162790695,
+        "top_problems": {
+          "precedent doesn't match freezing camera symptoms for a facet": 1,
+          "asks about camera freezing instead of general phone freezing": 1,
+          "reply template mismatch for the user issue": 1,
+          "asks about a playlist when the customer asked about contacts": 1
+        }
+      }
+    },
+    "agent": {
+      "intent": {
+        "balanced": {
+          "n": 180,
+          "accuracy": 0.8333333333333334,
+          "macro_f1": 0.8203099817153984,
+          "per_class_f1": {
+            "account_billing": 0.7894736842105263,
+            "app_or_service_issue": 0.8135593220338984,
+            "autocorrect_bug": 0.9787234042553191,
+            "data_loss": 0.85,
+            "device_crash_reboot": 0.6875,
+            "hardware_repair": 0.8717948717948718,
+            "not_actionable": 0.6857142857142857,
+            "update_performance": 0.8857142857142857
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              15,
+              2,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              24,
+              0,
+              1,
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              17,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              11,
+              0,
+              1,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              17,
+              0,
+              0
+            ],
+            [
+              3,
+              1,
+              0,
+              1,
+              0,
+              2,
+              12,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              31
+            ]
+          ]
+        },
+        "weighted": {
+          "n": 180,
+          "accuracy": 0.8427345317304982,
+          "macro_f1": 0.7643453406632893,
+          "per_class_f1": {
+            "account_billing": 0.7437412244681694,
+            "app_or_service_issue": 0.8104665829584099,
+            "autocorrect_bug": 0.9393034821364482,
+            "data_loss": 0.5134198573289854,
+            "device_crash_reboot": 0.5594546745869676,
+            "hardware_repair": 0.835194584340613,
+            "not_actionable": 0.818184947495733,
+            "update_performance": 0.8949973719909876
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              15,
+              2,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              24,
+              0,
+              1,
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              17,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              11,
+              0,
+              1,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              17,
+              0,
+              0
+            ],
+            [
+              3,
+              1,
+              0,
+              1,
+              0,
+              2,
+              12,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              31
+            ]
+          ]
+        },
+        "blind_only": {
+          "n": 60,
+          "accuracy": 0.7833333333333333,
+          "macro_f1": 0.7341133291261168,
+          "per_class_f1": {
+            "account_billing": 0.7058823529411765,
+            "app_or_service_issue": 0.782608695652174,
+            "autocorrect_bug": 1.0,
+            "data_loss": 0.8571428571428571,
+            "device_crash_reboot": 0.4,
+            "hardware_repair": 0.7272727272727273,
+            "not_actionable": 0.5,
+            "update_performance": 0.9
+          },
+          "labels": [
+            "account_billing",
+            "app_or_service_issue",
+            "autocorrect_bug",
+            "data_loss",
+            "device_crash_reboot",
+            "hardware_repair",
+            "not_actionable",
+            "update_performance"
+          ],
+          "confusion": [
+            [
+              6,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              9,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              4,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0,
+              1,
+              0,
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              9
+            ]
+          ]
+        }
+      },
+      "escalation": {
+        "balanced": {
+          "n": 180,
+          "escalation_rate": 0.5333333333333333,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.6979166666666666,
+          "recall": 0.9054054054054054,
+          "f1": 0.788235294117647,
+          "missed_escalations": 7,
+          "needless_escalations": 29,
+          "cost_per_100": 55.0
+        },
+        "weighted": {
+          "n": 180,
+          "escalation_rate": 0.5333333333333333,
+          "true_escalation_rate": 0.4111111111111111,
+          "precision": 0.3982686371992512,
+          "recall": 0.8491254498523599,
+          "f1": 0.5422184363936435,
+          "missed_escalations": 7,
+          "needless_escalations": 29,
+          "cost_per_100": 55.0
+        },
+        "cost_sweep": {
+          "3:1": 27.77777777777778,
+          "10:1": 55.0,
+          "30:1": 132.77777777777777
+        },
+        "missed_by_intent": {
+          "account_billing": 2,
+          "data_loss": 1,
+          "device_crash_reboot": 4
+        }
+      },
+      "reply": {
+        "n_drafted": 84,
+        "n_judged": 40,
+        "ungrounded_rate": 0.011904761904761904,
+        "over_limit": 0,
+        "groundedness": 4.95,
+        "helpfulness": 4.975,
+        "tone": 5.0,
+        "safety": 4.95,
+        "mean": 4.96875,
+        "top_problems": {
+          "adds unsupported version 11.1.1 not in precedent for this cu": 1
+        }
+      }
+    }
+  },
+  "judge_agreement": null,
+  "self_consistency": null,
+  "cross_family": {
+    "n": 22,
+    "mean_human": 5.0,
+    "mean_judge": 4.784090909090909,
+    "judge_bias": -0.21590909090909083,
+    "within_1": 0.9545454545454546,
+    "exact_match": 0.7727272727272727,
+    "spearman": null,
+    "spearman_p": null,
+    "kappa_quadratic": 0.0
+  }
+}

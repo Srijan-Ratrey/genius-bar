@@ -1,0 +1,41 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- groundedness: Does the reply claim ONLY things the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said, e.g. a version number, a timeline, a refund, or a promise that a fix is coming.\n- helpfulness: Does it move this customer forward? 5 = a clear next step or the one diagnostic question that unblocks them. 3 = relevant but vague. 1 = generic sympathy with no next step, or answers a different problem.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: my iPhone alarm doesn’t work unless phone is unlocked. What’s the deal?\n  proposed reply: Hey, we can offer some guidance. For help with an app you've installed, please take a look here: [support link]\n  precedent available to the drafter:\n      1. customer: The “I” doesn’t work 🤦🏽‍♀️\n         Apple replied: Hello, are you updated to iOS 11.1.1 yet? You can find out more information here: [support link] Be sure to back up your iPhone before updating.\n      2. customer: Alright , what’s the deal with “I️” this is annoying.\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      3. customer: upgraded to 11.0.2 now crashes. What’s the deal?\n         Apple replied: Hey, we can offer some guidance. For help with an app you've installed, please take a look here: [support link]\n      4. customer: still doesn’t work\n         Apple replied: We recently released iOS 11.1.1. We'd recommend backing up your device and updating the system as outlined here: [support link]\n      5. customer: My iphone 5s keeps turning off randomly after ios 11.1 update. What's the deal?\n         Apple replied: Thank you for that information. Please back up and update to our latest iOS 11.1.1, and let us know if the issue persists. These steps here will walk you through the process: [support link]\n\n--- REPLY 2 ---\n  customer wrote: - #spotlightsearch on the #iPhone (with updated iOS) doesn’t work properly. I should be able to search and find apps with key words!\n  proposed reply: Apple welcomes suggestions. Here’s a great link to submit your feedback: [support link]\n  precedent available to the drafter:\n      1. customer: The “I” doesn’t work 🤦🏽‍♀️\n         Apple replied: Hello, are you updated to iOS 11.1.1 yet? You can find out more information here: [support link] Be sure to back up your iPhone before updating.\n      2. customer: This auto brightness on my phone is so annoying. We should be able to turn that off.\n         Apple replied: Let's help. To adjust auto-brightness in your Settings, please follow the steps here: [support link]\n      3. customer: 👁 want to be able to use the letter I️ !\n         Apple replied: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n      4. customer: You should be able to drag the print screen from the bottom left corner into a text message or WhatsApp etc.\n         Apple replied: Apple welcomes suggestions. Here’s a great link to submit your feedback: [support link]\n      5. customer: still doesn’t work\n         Apple replied: We recently released iOS 11.1.1. We'd recommend backing up your device and updating the system as outlined here: [support link]\n\n--- REPLY 3 ---\n  customer wrote: my iPhone 6s Plus isn’t making alert sounds anymore. Do not disturb is off. Any ideas about a solution?\n  proposed reply: We can certainly take a look into this issue and work towards a resolution. To get started, what iOS version is on the iPhone?\n  precedent available to the drafter:\n      1. customer: 11.1.2 iPhone 6s Plus\n         Apple replied: Have you tried restarting your device and testing Siri? Here’s how: [support link]\n      2. customer: so my phone went off during my class when my phone was on do not disturb, fix this\n         Apple replied: Hey there. We totally understand that's not what you want. Was the contact in your favorites by chance? Also, in Settings &gt; Do Not Disturb &gt; Silence is that set to Always or While iPhone is locked? Let's check your\n      3. customer: 6s plus, iOS 11.0.3\n         Apple replied: Thanks for this. Can you let us know when you are noticing these behaviors the most? During the use of apps?\n      4. customer: okay but why can some calls still get through when my do not disturb is on?\n         Apple replied: We're happy to help you with this. Navigate to Settings &gt; Do Not Disturb &gt; Allow Calls From and tell us what that is set to.\n      5. customer: - iPhone 6S Plus suddenly losing battery life since yesterday - % goes down by the second. Any ideas on what it might be?\n         Apple replied: We can certainly take a look into this issue and work towards a resolution. To get started, what iOS version is on the iPhone?\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "helpfulness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "groundedness",
+        "helpfulness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": []
+}
