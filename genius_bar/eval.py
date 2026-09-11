@@ -150,6 +150,12 @@ def _reply_block(preds: list[Triage], scores: list[dict | None]) -> dict:
     # row instead of branching on whether scores exist.
     for k in [*judge_mod.RUBRIC, "mean"]:
         block[k] = sum(s[k] for s in scored) / len(scored) if scored else None
+    # The judge's sharpest signal: could this reply be sent to a different
+    # customer unnoticed? It separates the systems far more cleanly than the
+    # 1-5 scores, three of which saturate at the top.
+    block["interchangeable_rate"] = (
+        sum(bool(s.get("interchangeable")) for s in scored) / len(scored) if scored else None
+    )
     if scored:
         problems: dict[str, int] = {}
         for s in scored:
@@ -229,18 +235,25 @@ def build_report(results: dict) -> str:
         lines.append(f"| {name} | " + " | ".join(
             f"{v:.1f}" for v in r["escalation"]["cost_sweep"].values()) + " |")
 
+    # Headers derived from RUBRIC, never hardcoded: they were hardcoded once and
+    # silently mislabelled every column after the rubric criteria changed.
+    crit = [k.replace("_", " ")[:12] for k in judge_mod.RUBRIC]
+    ncol = len(crit) + 5
     lines += ["", "## Reply quality (LLM judge, 1-5)", "",
-              "| system | grounded | helpful | tone | safety | mean | drafted "
-              "| ungrounded | >280 chars |", "|---|---|---|---|---|---|---|---|---|"]
+              "| system | " + " | ".join(crit)
+              + " | mean | interchangeable | drafted | ungrounded |",
+              "|" + "---|" * ncol]
     for name, r in results["systems"].items():
         q = r["reply"]
         # Both branches must yield the same number of cells, or the row's pipes
         # desynchronise from the header and the table silently renders wrong.
         cells = ([f"{q[k]:.2f}" for k in [*judge_mod.RUBRIC, "mean"]]
                  if q["mean"] is not None else ["-"] * (len(judge_mod.RUBRIC) + 1))
+        inter = q.get("interchangeable_rate")
         lines.append("| " + " | ".join([
-            name, *cells, str(q["n_drafted"]),
-            f"{q['ungrounded_rate']:.1%}", str(q["over_limit"]),
+            name, *cells,
+            f"{inter:.0%}" if inter is not None else "-",
+            str(q["n_drafted"]), f"{q['ungrounded_rate']:.1%}",
         ]) + " |")
 
     if results.get("judge_agreement"):

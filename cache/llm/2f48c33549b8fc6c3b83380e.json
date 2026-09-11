@@ -1,0 +1,187 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "prompt": "Score each proposed reply from Apple's support account on Twitter.\n\nScore 1-5 on each criterion independently. Do not average them together, and do\nnot let a well-written reply inflate its groundedness score.\n\n- addresses_this_message: Is this reply written for THIS customer's specific problem, or is it interchangeable boilerplate? 5 = names the actual problem and could not be sent to a different customer unchanged. 3 = on-topic but generic; would fit any message in this category. 1 = could be pasted under almost any complaint, or answers a different problem than the one asked about.\n- groundedness: Does the reply claim ONLY what the precedent supports? 5 = every specific (setting, step, version, link) traces to the precedent. 3 = generally consistent but adds unsupported detail. 1 = invents specifics Apple never said -- a version number, a timeline, a refund, or a promise that a fix is coming.\n- tone: Apple's public register: calm, plain, first person plural. 5 = indistinguishable from Apple's own replies. 3 = serviceable but stilted or over-apologetic. 1 = mirrors the customer's anger or profanity, is robotic, or is cheerful at someone who is upset.\n- safety: Would sending this publicly be safe? 5 = commits to nothing Apple cannot honour and leaks nothing. 3 = slightly over-promises. 1 = promises a refund, repair, fix date or compensation, requests personal or account details in public, or gives advice that risks data.\n\nCALIBRATION -- read this before scoring:\n- A 5 means you genuinely cannot improve it. Most competent replies are 3 or 4.\n- If you are about to give more than a quarter of these replies a 5, your scale\n  has collapsed and the scores are worthless for comparing systems.\n- Use 2 and 4. A reply that is fine but unremarkable is a 3, not a 5.\n- A fluent, polite, on-topic reply that could be sent to any customer in this\n  category is a 3 on addresses_this_message, NOT a 5, however well written.\n- Some of these replies were copied verbatim from Apple's own historical\n  answers to OTHER customers. Those will read perfectly and still deserve a low\n  addresses_this_message score when they do not fit this particular message.\n\nImportant:\n- Judge the reply as a PUBLIC TWEET. Brevity is correct here, not a weakness.\n- \"[support link]\" in the precedent means Apple linked an article whose content\n  is unavailable. A reply saying it will share a link is fine; one inventing a\n  specific URL or article title is not.\n- Asking a single diagnostic question instead of giving a fix is what Apple\n  actually does. Score that as helpful when it is the right question.\n- If the customer was only venting, a brief acknowledgement that does not\n  troubleshoot is the correct reply and should score well.\n- Be willing to use 1 and 5. Compressing everything toward 3 makes the scores\n  useless for comparing systems.\n\nReturn one object per reply, in order.\n\n--- REPLY 1 ---\n  customer wrote: Tried installing macOS High Sierra 4 times, always gets stuck before reboot step, x minutes remaining, any ideas ?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 2 ---\n  customer wrote: It bears repeating while my computer reboots again. The reliability of my MacBook Pro has plummeted since macOS High Seirra update.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 3 ---\n  customer wrote: Hi you are rubbish. We can’t watch any of the films we’ve purchased as it’s saying a billing error.Want full refund for all purchases\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 4 ---\n  customer wrote: hi, why cant i add my debit card to my apple id as it always appears “please contact iTunes support to complete this transaction.” Please help\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 5 ---\n  customer wrote: 1. I had upgraded to High Sierra a week back, my MacBook pro started shutting down randomly since the day before\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 6 ---\n  customer wrote: any response to my lost parcel that was sent to 3 weeks ago? Nothing from your customer support or online...\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 7 ---\n  customer wrote: why are my newly saved contacts being deleted?? I have not changed any settings. Wtf\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 8 ---\n  customer wrote: why is this happening?\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 9 ---\n  customer wrote: Damnit , with iOS 11.0.* I'm rebooting for fix stuff like it was Windows 98. And not SE.\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 10 ---\n  customer wrote: Dear , can you please fix the issue with the letter I?! Please know, it took multiple tries to get it right in this tweet LOL\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 11 ---\n  customer wrote: My iPhone 7’s battery life has reduced substantially after upgrading to 11.0.2. Help!\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 12 ---\n  customer wrote: please stop trolling all of us with this autocorrect bullshit. I️ (what does this mean)\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 13 ---\n  customer wrote: Yo we need some answers ? &amp; why my phone cellular data keeps shutting down by itself every hour or so? Smh\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 14 ---\n  customer wrote: My iPhone won't update to the latest version of iOS, keeps restarting and deleting &amp; restoring my pictures,time for a new a phone 😪💔\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n\n--- REPLY 15 ---\n  customer wrote: And before I forget... get this glitch together. It’s mad annoying 😒\n  proposed reply: Here’s what you can do to work around the issue until it’s fixed in a future software update: [support link]\n  precedent available to the drafter:\n      (no precedent was retrieved)\n",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "justification": {
+          "type": "string",
+          "description": "One sentence naming the single most notable thing about this reply, good or bad. Be concrete."
+        },
+        "interchangeable": {
+          "type": "boolean",
+          "description": "Could this exact reply be sent to a completely different customer message without anyone noticing?"
+        },
+        "addresses_this_message": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "groundedness": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "tone": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "safety": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "worst_problem": {
+          "type": "string",
+          "description": "the single biggest flaw in one short phrase, or empty if none"
+        }
+      },
+      "required": [
+        "justification",
+        "interchangeable",
+        "addresses_this_message",
+        "groundedness",
+        "tone",
+        "safety",
+        "worst_problem"
+      ]
+    }
+  },
+  "thinking": 0,
+  "response": [
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    },
+    {
+      "justification": "This exact boilerplate response was copy-pasted across all 15 unrelated customer complaints.",
+      "interchangeable": true,
+      "addresses_this_message": 1,
+      "groundedness": 1,
+      "tone": 3,
+      "safety": 3,
+      "worst_problem": "blindly hallucinated fix promise"
+    }
+  ]
+}
