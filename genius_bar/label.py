@@ -204,7 +204,14 @@ def _load_suggestions(todo: list[dict]) -> dict[int, str]:
 
     from genius_bar.agent import classify
 
-    console.print(f"pre-labelling {len(assisted)} assisted examples...")
+    from genius_bar.llm import MIN_INTERVAL
+
+    batches = -(-len(assisted) // 8)
+    console.print(
+        f"pre-labelling {len(assisted)} assisted examples "
+        f"({batches} batched requests, ~{batches * MIN_INTERVAL / 60:.0f} min the "
+        f"first time, instant afterwards from cache)..."
+    )
     try:
         preds = classify([i["message"] for i in assisted])
     except Exception as exc:  # quota, network -- labelling should still proceed
