@@ -3,8 +3,10 @@
 A judge score is worthless without a measured agreement number attached, and
 this one has two specific weaknesses that the report states plainly:
 
-1. SELF-ENHANCEMENT BIAS. The primary judge and the drafter are both Gemini, so
-   the judge is partly grading its own family's output. `cross_family_judge`
+1. SELF-ENHANCEMENT BIAS. Judge and drafter are different models but the same
+   family, so the judge is partly grading its own family's output. (They were
+   originally the same model; the free tier's per-model daily cap forced them
+   apart, which happens to weaken the bias rather than merely disclose it.) `cross_family_judge`
    re-scores a subset with Gemma -- a different model family on the same API --
    and the correlation between them bounds how much of the score is shared
    bias -- see the cross-family block in eval.main. Gemini pro would have been
@@ -114,7 +116,7 @@ Return one object per reply, in order.
 
 
 def judge_replies(
-    items: list[dict], model: str = llm.PRIMARY, batch_size: int = 6
+    items: list[dict], model: str = llm.JUDGE, batch_size: int = 15
 ) -> list[dict]:
     """Score drafts on the rubric.
 

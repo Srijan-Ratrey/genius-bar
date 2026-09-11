@@ -287,11 +287,20 @@ alone. Intent metrics are additionally broken out over the 60 blind labels.
   ungrounded, and one merged "quality" score would hide exactly that failure.
   Empty drafts are skipped rather than scored 1, so correctly declining to answer
   is not punished as bad writing.
+**A quota constraint that improved the design.** The free tier allows 20
+generate requests per day *per model*, so each stage runs on a different model:
+classify and draft on `gemini-3.5-flash`, judging on `gemini-3.5-flash-lite`,
+cross-family checking on Gemma. Judge and drafter were originally the same
+model. Being forced apart genuinely weakens self-enhancement bias rather than
+merely disclosing it. `make eval` prints a per-model request estimate before
+spending any quota, and reply quality is scored on a 90-example subset (the
+same examples for every system) so a fresh run fits inside one day.
+
 - **Judge trust** — quadratic kappa and Spearman against hand ratings on the
   blind subset, plus judge bias (is it systematically generous?). Both are
   reported because they fail differently: a judge that is consistently one point
   generous looks terrible on kappa and near-perfect on Spearman.
-- **Cross-family check** — a subset re-scored by `gemma-4-31b-it`, a different
+- **Cross-family check** — a subset re-scored by `gemma-4-26b-a4b-it`, a different
   model family. Low correlation would mean much of the primary judge's score is
   family-specific taste rather than quality.
 
@@ -414,9 +423,12 @@ original plan.
 
 - Dataset: [Customer Support on Twitter](https://www.kaggle.com/datasets/thoughtvector/customer-support-on-twitter)
   (thoughtvector, Kaggle).
-- Models: `gemini-3.7-flash` (classify, draft, judge), `gemma-4-31b-it`
-  (cross-family judge), `gemini-embedding-001` (taxonomy clustering only), via
-  Google AI Studio.
+- Models, via Google AI Studio free tier: `gemini-3.5-flash` (classify, draft),
+  `gemini-3.5-flash-lite` (judge), `gemini-3.1-flash-lite` (assisted-pass
+  pre-labels), `gemma-4-26b-a4b-it` (cross-family judge),
+  `gemini-embedding-001` (taxonomy clustering only). Each stage runs on its own
+  model because the free tier caps generate requests at **20 per day per
+  model** -- see §4.
 - Libraries: pandas, scikit-learn (TF-IDF, KMeans, metrics), scipy, google-genai,
   tenacity, rich, pyyaml. No torch.
 - "Genius Bar" is an Apple trademark, used here only as a project codename for a

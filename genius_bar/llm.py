@@ -40,13 +40,23 @@ CACHE_DIR = REPO_ROOT / "cache"
 LLM_CACHE = CACHE_DIR / "llm"
 EMBED_CACHE = CACHE_DIR / "embed"
 
-# Primary worker: classification, drafting, and the main judge.
-PRIMARY = "gemini-3.7-flash"
-# A deliberately different model *family* for cross-checking the judge. Gemma is
-# not Gemini, so agreement between them is weaker evidence of shared bias than
-# two Gemini models would be. Gemini pro would have been the stronger judge but
-# returns 429 on the free tier.
-ALT_JUDGE = "gemma-4-31b-it"
+# The free tier allows only 20 generate requests per DAY *per model*
+# (GenerateRequestsPerDayPerProjectPerModel-FreeTier). That per-model split is
+# the only reason a full evaluation fits in a day: each stage runs on its own
+# model and draws on its own quota.
+#
+# A side benefit worth stating in the report -- the judge is no longer the same
+# model as the drafter, which weakens self-enhancement bias rather than merely
+# disclosing it.
+PRIMARY = "gemini-3.5-flash"          # classify + draft
+JUDGE = "gemini-3.5-flash-lite"       # reply scoring; same family, different model
+SUGGEST = "gemini-3.1-flash-lite"     # assisted-pass pre-labels
+ALT_JUDGE = "gemma-4-26b-a4b-it"      # cross-family check; not Gemini at all
+
+# gemini-3.7-flash and gemma-4-31b-it were the original picks. The first is
+# quota-exhausted and the second returns 503; both are kept here only so the
+# committed cache entries they produced remain explicable.
+RETIRED = ("gemini-3.7-flash", "gemma-4-31b-it", "gemini-3.8-flash")
 
 # gemini-embedding-2 returns a single vector no matter how many inputs you pass,
 # so it cannot be batched; -001 batches correctly.
@@ -290,13 +300,40 @@ def map_batched(
         got = len(result) if isinstance(result, list) else "non-array"
         print(
             f"[llm] batch at {start} returned {got} results for {len(batch)} items; "
-            "falling back to one request per item",
+            f"bisecting",
             file=sys.stderr,
         )
-        for item in batch:
-            single = generate(build_prompt([item]), schema, model=model, thinking=thinking)
-            out.append(single[0] if isinstance(single, list) and single else None)
+        out.extend(_bisect(batch, build_prompt, schema, model, thinking))
 
+    return out
+
+
+def _bisect(
+    batch: Sequence[Any],
+    build_prompt: Callable[[Sequence[Any]], str],
+    schema: dict,
+    model: str,
+    thinking: int | None,
+) -> list[Any]:
+    """Recover a misaligned batch by halving, not by going one-at-a-time.
+
+    A misaligned batch of 30 would cost 30 requests to redo individually --
+    more than an entire day's quota. Halving costs ~log2(n) requests and still
+    guarantees every item is covered, which matters because a silently
+    misaligned batch attaches every result to the wrong input.
+    """
+    if len(batch) == 1:
+        single = generate(build_prompt(batch), schema, model=model, thinking=thinking)
+        return [single[0] if isinstance(single, list) and single else None]
+
+    mid = len(batch) // 2
+    out: list[Any] = []
+    for half in (batch[:mid], batch[mid:]):
+        result = generate(build_prompt(half), schema, model=model, thinking=thinking)
+        if isinstance(result, list) and len(result) == len(half):
+            out.extend(result)
+        else:
+            out.extend(_bisect(half, build_prompt, schema, model, thinking))
     return out
 
 

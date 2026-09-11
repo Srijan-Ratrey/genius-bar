@@ -335,3 +335,42 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
     evidence" isolates the drafting step. The simple baseline copies verbatim
     and never paraphrases -- there is a test for that, because a paraphrasing
     control would quietly stop being a control.
+
+## Quota, discovered the hard way (milestone 9)
+
+55. **The free tier allows 20 generate requests per DAY, per model.**
+    *load-bearing.* Not the ~250 the plan assumed. Found only when the assisted
+    pre-labelling failed mid-session:
+    `GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue: 20`. A full
+    evaluation needs ~136 naive requests, which would have been seven days.
+
+56. **Each stage runs on a different model, because the cap is per model.**
+    classify/draft on `gemini-3.5-flash`, judging on `gemini-3.5-flash-lite`,
+    pre-labels on `gemini-3.1-flash-lite`, cross-family on
+    `gemma-4-26b-a4b-it`. A fresh run is ~15 + ~12 + ~4 requests, each inside
+    its own cap. `gemini-3.7-flash` and `gemma-4-31b-it` are retired (exhausted
+    and 503 respectively) but named in the code so their committed cache
+    entries stay explicable.
+
+57. **The quota constraint improved the design.** Judge and drafter were the
+    same model, which is textbook self-enhancement bias. Being forced onto
+    different models weakens that bias rather than merely disclosing it. Worth
+    recording that the constraint produced a better experiment than the free
+    choice did.
+
+58. **Misaligned batches bisect rather than falling back per item.**
+    *load-bearing.* With batch sizes raised to 10-30 to conserve quota, a
+    per-item fallback would spend more than a day's entire quota recovering
+    from one bad batch. Bisecting costs ~log2(n) and still guarantees every
+    item is covered.
+
+59. **Reply quality is judged on 90 examples, not all 180.** Judging three
+    systems across 180 examples exceeds the daily cap. The same 90 are used for
+    every system -- a different sample per system would make the comparison
+    between them meaningless.
+
+60. **Labels record whether a suggestion was actually shown.** When
+    pre-labelling failed, the assisted pass silently degraded to blind. The
+    report claims "120 assisted, model pre-labels, human corrects", and that
+    claim is only true for records where a suggestion reached the screen. Now
+    stored per record as `suggestion_shown`.

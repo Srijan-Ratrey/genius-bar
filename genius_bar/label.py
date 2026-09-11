@@ -139,6 +139,10 @@ def ask_label(item: dict, intents: dict[str, dict], suggestion: str | None) -> d
         "should_escalate": should_escalate,
         "note": note,
         "pass": item["pass"],
+        # Whether a model suggestion was actually on screen. The assisted pass
+        # can silently degrade to blind when quota runs out, and the report
+        # must not claim assistance that was never shown.
+        "suggestion_shown": suggestion or "",
         "proxy_intent": item["proxy_intent"],
         "hard_cases": item.get("hard_cases", []),
         "weight": item.get("weight", 1.0),
@@ -202,21 +206,26 @@ def _load_suggestions(todo: list[dict]) -> dict[int, str]:
     if not assisted:
         return {}
 
+    from genius_bar import llm as llm_mod
     from genius_bar.agent import classify
 
     from genius_bar.llm import MIN_INTERVAL
 
-    batches = -(-len(assisted) // 8)
+    batches = -(-len(assisted) // 30)
     console.print(
         f"pre-labelling {len(assisted)} assisted examples "
         f"({batches} batched requests, ~{batches * MIN_INTERVAL / 60:.0f} min the "
         f"first time, instant afterwards from cache)..."
     )
     try:
-        preds = classify([i["message"] for i in assisted])
+        preds = classify([i["message"] for i in assisted], model=llm_mod.SUGGEST)
     except Exception as exc:  # quota, network -- labelling should still proceed
-        console.print(f"[yellow]could not pre-label ({type(exc).__name__}); "
-                      f"continuing without suggestions[/yellow]")
+        detail = "daily quota exhausted" if "429" in str(exc) else str(exc).splitlines()[0][:90]
+        console.print(
+            f"[yellow]could not pre-label: {detail}[/yellow]\n"
+            "[yellow]Continuing WITHOUT suggestions. These labels are then "
+            "effectively blind, which is recorded per record.[/yellow]"
+        )
         return {}
     return {
         i["id"]: f"{p['intent']} (conf {p['confidence']:.2f})"
