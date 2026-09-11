@@ -148,7 +148,7 @@ MESSAGES:
 """
 
 
-def classify(messages: list[str], batch_size: int = 8, model: str = llm.PRIMARY) -> list[dict]:
+def classify(messages: list[str], batch_size: int = 30, model: str = llm.PRIMARY) -> list[dict]:
     """Intent, confidence and risk signals for each message."""
     raw = llm.map_batched(
         [clean_text(m) for m in messages],
@@ -269,7 +269,7 @@ Return one object per message, in order.
 
 
 def draft(
-    items: list[tuple[str, str, list[dict]]], batch_size: int = 4, model: str = llm.PRIMARY
+    items: list[tuple[str, str, list[dict]]], batch_size: int = 10, model: str = llm.PRIMARY
 ) -> list[dict]:
     """Draft replies for (message, intent, evidence) triples."""
     raw = llm.map_batched(items, _draft_prompt, DRAFT_SCHEMA, batch_size=batch_size, model=model)

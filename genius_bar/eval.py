@@ -47,6 +47,9 @@ REPORTS = REPO_ROOT / "reports"
 # The 10:1 default is a judgement call, so results are shown across a range.
 COST_RATIOS = [3.0, 10.0, 30.0]
 
+# Free-tier ceiling, per model, per day.
+FREE_TIER_RPD = 20
+
 
 def load_golden(path: Path | None = None) -> list[dict]:
     # Resolved at call time, not bound as a default: a default argument captures
@@ -63,6 +66,26 @@ def load_golden(path: Path | None = None) -> list[dict]:
     if not rows:
         raise SystemExit(f"{path.name} is empty -- nothing labelled yet.")
     return rows
+
+
+def preflight(n_golden: int, judge_sample: int) -> None:
+    """Print the request cost per model before spending any of it.
+
+    The free tier allows 20 generate requests per day PER MODEL, so the only
+    way a full run fits in a day is by putting each stage on its own model.
+    Printing this up front turns "it died halfway" into a decision made in
+    advance. Anything already cached costs nothing, so reruns shrink.
+    """
+    est = {
+        llm.PRIMARY: -(-n_golden // 30) + -(-(n_golden // 2) // 10),  # classify + draft
+        llm.JUDGE: -(-(judge_sample * 2) // 15),                      # ~2 drafts per example
+        llm.ALT_JUDGE: -(-min(40, judge_sample) // 10),               # cross-family
+    }
+    print("\nestimated live requests (cached prompts cost nothing):")
+    for model, n in est.items():
+        flag = "" if n <= FREE_TIER_RPD else f"  <-- OVER the {FREE_TIER_RPD}/day free cap"
+        print(f"  {model:24} ~{n:3}{flag}")
+    print()
 
 
 def run_systems(golden: list[dict], retriever: Retriever) -> dict[str, list[Triage]]:
@@ -269,6 +292,12 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None, help="evaluate only the first N")
     ap.add_argument("--no-judge", action="store_true", help="skip reply scoring")
     ap.add_argument("--cross-family", type=int, default=40, help="0 to skip")
+    ap.add_argument(
+        "--judge-sample", type=int, default=90,
+        help="how many golden examples to score for reply quality (0 = all). "
+             "Judging all 180 across three systems exceeds the free-tier daily cap; "
+             "90 is enough for a stable mean and keeps a fresh run inside one day.",
+    )
     args = ap.parse_args()
 
     golden = load_golden()
@@ -278,6 +307,8 @@ def main() -> None:
 
     retriever = Retriever()
     print(f"corpus: {len(retriever.corpus):,} grounding pairs")
+    if not args.no_judge:
+        preflight(len(golden), args.judge_sample or len(golden))
 
     try:
         systems = run_systems(golden, retriever)
@@ -296,8 +327,13 @@ def main() -> None:
     for name, preds in systems.items():
         scores = [None] * len(preds)
         if not args.no_judge:
-            print(f"judging {name}...")
-            scores = judge_mod.judge_replies([t.to_dict() for t in preds])
+            # Score a fixed prefix so every system is judged on the SAME
+            # examples -- a different sample per system would make the
+            # comparison between them meaningless.
+            limit = args.judge_sample or len(preds)
+            print(f"judging {name} (first {min(limit, len(preds))} examples)...")
+            judged = judge_mod.judge_replies([t.to_dict() for t in preds[:limit]])
+            scores = judged + [None] * (len(preds) - len(judged))
         all_scores[name] = scores
         results["systems"][name] = {
             "intent": _intent_block(golden, preds),

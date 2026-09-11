@@ -119,27 +119,47 @@ def test_cached_prompt_replays_without_key(isolated_cache):
     assert llm.generate("hello", schema) == {"intent": "billing"}
 
 
-def test_batch_length_mismatch_falls_back_per_item(monkeypatch):
-    """A short batch response must not silently misalign results with inputs."""
+def test_batch_misalignment_is_recovered_by_bisecting(monkeypatch):
+    """A short batch response must not silently misalign results with inputs.
+
+    Recovery bisects rather than dropping to one request per item. With batch
+    sizes in the tens and a free-tier cap of 20 generate requests per day per
+    model, a per-item fallback would spend an entire day's quota recovering
+    from a single bad batch.
+    """
     calls = []
 
     def fake_generate(prompt, schema, model=None, thinking=0):
-        calls.append(prompt)
         n = prompt.count("|")
-        # Simulate a model that drops an item whenever given more than one.
-        return [{"v": 1}] * (n - 1) if n > 1 else [{"v": 1}]
+        calls.append(n)
+        # Realistic failure: the model drops an item only on large batches.
+        return [{"v": 1}] * (n - 1 if n > 8 else n)
 
     monkeypatch.setattr(llm, "generate", fake_generate)
 
     out = llm.map_batched(
-        ["a", "b", "c"],
+        [f"item{i}" for i in range(16)],
         lambda batch: "".join(f"|{x}" for x in batch),
         {"type": "object"},
-        batch_size=3,
+        batch_size=16,
     )
 
-    assert len(out) == 3, "result count must match input count"
-    assert len(calls) == 4, "expected 1 failed batch + 3 per-item retries"
+    assert len(out) == 16, "every input must get a result"
+    assert all(r is not None for r in out), "no item may be silently dropped"
+    # 1 failed batch of 16 + two halves of 8 = 3 requests, versus 17 per-item.
+    assert len(calls) < 8, f"bisect should cost ~log2(n) requests, spent {len(calls)}"
+
+
+def test_bisect_terminates_on_a_pathological_model(monkeypatch):
+    """Even a model that always returns short must not loop or lose items."""
+    monkeypatch.setattr(llm, "generate", lambda prompt, schema, model=None, thinking=0: (
+        [{"v": 1}] * max(0, prompt.count("|") - 1)
+    ))
+    out = llm.map_batched(
+        ["a", "b", "c"], lambda b: "".join(f"|{x}" for x in b), {"type": "object"},
+        batch_size=3,
+    )
+    assert len(out) == 3
 
 
 # --- metrics ---------------------------------------------------------------
