@@ -166,22 +166,51 @@ def _reply_block(preds: list[Triage], scores: list[dict | None]) -> dict:
     return block
 
 
-def judge_agreement(agent_preds: list[Triage], scores: list[dict | None]) -> dict | None:
-    """Compare the judge against human ratings from data/reply_ratings.jsonl."""
+def judge_agreement(
+    golden: list[dict], agent_preds: list[Triage], scores: list[dict | None]
+) -> dict | None:
+    """Compare the judge against human ratings from data/reply_ratings.jsonl.
+
+    Matched on the golden example's id. An earlier version keyed the human
+    ratings by tweet id but looked them up by loop index, so nothing ever
+    matched and agreement silently reported "too few ratings" -- quietly
+    removing the one piece of evidence that makes the judge's scores mean
+    anything.
+    """
     if not REPLY_RATINGS.exists():
         return None
     human = {
         r["id"]: r for r in
         (json.loads(l) for l in REPLY_RATINGS.read_text().splitlines() if l.strip())
     }
-    pairs = [
-        (human[i]["mean"], s["mean"])
-        for i, (t, s) in enumerate(zip(agent_preds, scores))
-        if s and i in human and "mean" in human[i]
-    ]
+    pairs, per_criterion = [], {k: ([], []) for k in judge_mod.RUBRIC}
+    for g, score in zip(golden, scores):
+        h = human.get(g["id"])
+        if not (score and h):
+            continue
+        if "mean" in h:
+            pairs.append((h["mean"], score["mean"]))
+        for k in judge_mod.RUBRIC:
+            if k in h and k in score:
+                per_criterion[k][0].append(h[k])
+                per_criterion[k][1].append(score[k])
+
     if len(pairs) < 10:
         return {"n": len(pairs), "note": "too few human ratings to report agreement"}
-    return metrics.agreement([h for h, _ in pairs], [j for _, j in pairs])
+
+    out = metrics.agreement([h for h, _ in pairs], [j for _, j in pairs])
+    # Per-criterion bias localises the disagreement: a judge that is fine on
+    # groundedness but wildly generous on tone is a different problem from one
+    # that is uniformly soft.
+    out["per_criterion"] = {
+        k: {
+            "human": sum(hs) / len(hs),
+            "judge": sum(js) / len(js),
+            "bias": sum(js) / len(js) - sum(hs) / len(hs),
+        }
+        for k, (hs, js) in per_criterion.items() if hs
+    }
+    return out
 
 
 def annotator_self_consistency(golden: list[dict]) -> dict | None:
@@ -271,6 +300,12 @@ def build_report(results: dict) -> str:
                 f"({'generous' if a['judge_bias'] > 0 else 'harsh'} vs human)",
                 f"- within 1 point = {a['within_1']:.1%}",
             ]
+            if a.get("per_criterion"):
+                lines += ["", "| criterion | human | judge | bias |", "|---|---|---|---|"]
+                lines += [
+                    f"| {k} | {v['human']:.2f} | {v['judge']:.2f} | {v['bias']:+.2f} |"
+                    for k, v in a["per_criterion"].items()
+                ]
 
     if results.get("cross_family"):
         c = results["cross_family"]
@@ -354,7 +389,7 @@ def main() -> None:
             "reply": _reply_block(preds, scores),
         }
 
-    results["judge_agreement"] = judge_agreement(systems["agent"], all_scores["agent"])
+    results["judge_agreement"] = judge_agreement(golden, systems["agent"], all_scores["agent"])
     results["self_consistency"] = annotator_self_consistency(golden)
 
     if args.cross_family and not args.no_judge:

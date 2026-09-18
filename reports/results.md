@@ -35,3 +35,18 @@ Ratio = cost of a missed escalation vs a needless one. Lower is better.
 | trivial | 1.27 | 1.00 | 2.88 | 1.36 | 1.62 | 100% | 180 | 100.0% |
 | simple | 3.86 | 4.42 | 4.49 | 4.91 | 4.42 | 30% | 83 | 1.2% |
 | agent | 4.53 | 5.00 | 5.00 | 5.00 | 4.88 | 10% | 84 | 1.2% |
+
+## Judge vs human
+
+- n = 30 rated by hand
+- Spearman = 0.462
+- quadratic kappa = 0.130
+- judge bias = +1.01 (generous vs human)
+- within 1 point = 66.7%
+
+| criterion | human | judge | bias |
+|---|---|---|---|
+| addresses_this_message | 3.57 | 4.63 | +1.07 |
+| groundedness | 3.70 | 5.00 | +1.30 |
+| tone | 4.23 | 5.00 | +0.77 |
+| safety | 4.10 | 5.00 | +0.90 |

@@ -1149,6 +1149,38 @@
       }
     }
   },
-  "judge_agreement": null,
+  "judge_agreement": {
+    "n": 30,
+    "mean_human": 3.9,
+    "mean_judge": 4.908333333333333,
+    "judge_bias": 1.0083333333333333,
+    "within_1": 0.6666666666666666,
+    "exact_match": 0.23333333333333334,
+    "spearman": 0.4616610742652901,
+    "spearman_p": 0.010226278512275493,
+    "kappa_quadratic": 0.12959381044487417,
+    "per_criterion": {
+      "addresses_this_message": {
+        "human": 3.566666666666667,
+        "judge": 4.633333333333334,
+        "bias": 1.0666666666666669
+      },
+      "groundedness": {
+        "human": 3.7,
+        "judge": 5.0,
+        "bias": 1.2999999999999998
+      },
+      "tone": {
+        "human": 4.233333333333333,
+        "judge": 5.0,
+        "bias": 0.7666666666666666
+      },
+      "safety": {
+        "human": 4.1,
+        "judge": 5.0,
+        "bias": 0.9000000000000004
+      }
+    }
+  },
   "self_consistency": null
 }
