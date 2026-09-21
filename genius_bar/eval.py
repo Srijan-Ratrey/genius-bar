@@ -33,6 +33,7 @@ from genius_bar.baselines import simple, trivial
 from genius_bar.data import REPO_ROOT
 from genius_bar.retrieve import Retriever
 
+
 def _rel(path: Path) -> str:
     """Path relative to the repo for display. relative_to() raises when the
     path sits outside REPO_ROOT; relpath never does."""
@@ -78,12 +79,14 @@ def preflight(n_golden: int, judge_sample: int) -> None:
     """
     est = {
         llm.PRIMARY: -(-n_golden // 30) + -(-(n_golden // 2) // 10),  # classify + draft
-        llm.JUDGE: -(-(judge_sample * 2) // 15),                      # ~2 drafts per example
-        llm.ALT_JUDGE: -(-min(40, judge_sample) // 10),               # cross-family
+        llm.JUDGE: -(-(judge_sample * 2) // 15),  # ~2 drafts per example
+        llm.ALT_JUDGE: -(-min(40, judge_sample) // 10),  # cross-family
     }
     print("\nestimated live requests (cached prompts cost nothing):")
     for model, n in est.items():
-        flag = "" if n <= FREE_TIER_RPD else f"  <-- OVER the {FREE_TIER_RPD}/day free cap"
+        flag = (
+            "" if n <= FREE_TIER_RPD else f"  <-- OVER the {FREE_TIER_RPD}/day free cap"
+        )
         print(f"  {model:24} ~{n:3}{flag}")
     print()
 
@@ -123,12 +126,16 @@ def _escalation_block(golden: list[dict], preds: list[Triage]) -> dict:
         "balanced": metrics.escalation_metrics(truth, pred),
         "weighted": metrics.escalation_metrics(truth, pred, sample_weight=weights),
         "cost_sweep": {
-            f"{r:g}:1": metrics.escalation_metrics(truth, pred, cost_missed=r)["cost_per_100"]
+            f"{r:g}:1": metrics.escalation_metrics(truth, pred, cost_missed=r)[
+                "cost_per_100"
+            ]
             for r in COST_RATIOS
         },
     }
     # Which intents the misses concentrate in -- the actionable part of a miss count.
-    missed = [golden[i]["intent"] for i in range(len(truth)) if truth[i] and not pred[i]]
+    missed = [
+        golden[i]["intent"] for i in range(len(truth)) if truth[i] and not pred[i]
+    ]
     out["missed_by_intent"] = {k: missed.count(k) for k in sorted(set(missed))}
     return out
 
@@ -142,7 +149,9 @@ def _reply_block(preds: list[Triage], scores: list[dict | None]) -> dict:
         # Self-reported by the drafter: a support draft citing no precedent.
         # Tracked because groundedness is this project's central claim.
         "ungrounded_rate": (
-            sum(1 for t in drafted if not t.used_evidence) / len(drafted) if drafted else 0.0
+            sum(1 for t in drafted if not t.used_evidence) / len(drafted)
+            if drafted
+            else 0.0
         ),
         "over_limit": sum(1 for t in drafted if len(t.draft) > 280),
     }
@@ -154,7 +163,9 @@ def _reply_block(preds: list[Triage], scores: list[dict | None]) -> dict:
     # customer unnoticed? It separates the systems far more cleanly than the
     # 1-5 scores, three of which saturate at the top.
     block["interchangeable_rate"] = (
-        sum(bool(s.get("interchangeable")) for s in scored) / len(scored) if scored else None
+        sum(bool(s.get("interchangeable")) for s in scored) / len(scored)
+        if scored
+        else None
     )
     if scored:
         problems: dict[str, int] = {}
@@ -162,7 +173,9 @@ def _reply_block(preds: list[Triage], scores: list[dict | None]) -> dict:
             p = (s.get("worst_problem") or "").strip().lower()[:60]
             if p:
                 problems[p] = problems.get(p, 0) + 1
-        block["top_problems"] = dict(sorted(problems.items(), key=lambda kv: -kv[1])[:5])
+        block["top_problems"] = dict(
+            sorted(problems.items(), key=lambda kv: -kv[1])[:5]
+        )
     return block
 
 
@@ -180,8 +193,10 @@ def judge_agreement(
     if not REPLY_RATINGS.exists():
         return None
     human = {
-        r["id"]: r for r in
-        (json.loads(l) for l in REPLY_RATINGS.read_text().splitlines() if l.strip())
+        r["id"]: r
+        for r in (
+            json.loads(l) for l in REPLY_RATINGS.read_text().splitlines() if l.strip()
+        )
     }
     pairs, per_criterion = [], {k: ([], []) for k in judge_mod.RUBRIC}
     for g, score in zip(golden, scores):
@@ -208,7 +223,8 @@ def judge_agreement(
             "judge": sum(js) / len(js),
             "bias": sum(js) / len(js) - sum(hs) / len(hs),
         }
-        for k, (hs, js) in per_criterion.items() if hs
+        for k, (hs, js) in per_criterion.items()
+        if hs
     }
     return out
 
@@ -218,8 +234,8 @@ def annotator_self_consistency(golden: list[dict]) -> dict | None:
     if not RECHECK.exists():
         return None
     second = {
-        r["id"]: r["intent"] for r in
-        (json.loads(l) for l in RECHECK.read_text().splitlines() if l.strip())
+        r["id"]: r["intent"]
+        for r in (json.loads(l) for l in RECHECK.read_text().splitlines() if l.strip())
     }
     pairs = [(g["intent"], second[g["id"]]) for g in golden if g["id"] in second]
     if len(pairs) < 10:
@@ -234,56 +250,98 @@ def build_report(results: dict) -> str:
     these five tables share a shape but no cell, so the helpers cost as many
     lines as the duplication they removed.
     """
-    lines = ["# Results", "", f"Golden set: {results['n']} examples "
-             f"({results['n_blind']} blind, {results['n_assisted']} assisted)", ""]
+    lines = [
+        "# Results",
+        "",
+        (
+            f"Golden set: {results['n']} examples "
+            f"({results['n_blind']} blind, {results['n_assisted']} assisted)"
+        ),
+        "",
+    ]
 
-    lines += ["## Intent classification", "",
-              "| system | acc (balanced) | macro-F1 | acc (weighted) | acc (blind only) |",
-              "|---|---|---|---|---|"]
+    lines += [
+        "## Intent classification",
+        "",
+        "| system | acc (balanced) | macro-F1 | acc (weighted) | acc (blind only) |",
+        "|---|---|---|---|---|",
+    ]
     for name, r in results["systems"].items():
         i = r["intent"]
         blind = f"{i['blind_only']['accuracy']:.3f}" if "blind_only" in i else "-"
-        lines.append(f"| {name} | {i['balanced']['accuracy']:.3f} | "
-                     f"{i['balanced']['macro_f1']:.3f} | "
-                     f"{i['weighted']['accuracy']:.3f} | {blind} |")
+        lines.append(
+            f"| {name} | {i['balanced']['accuracy']:.3f} | "
+            f"{i['balanced']['macro_f1']:.3f} | "
+            f"{i['weighted']['accuracy']:.3f} | {blind} |"
+        )
 
-    lines += ["", "## Escalation", "",
-              "| system | precision | recall | missed | needless | cost/100 (10:1) |",
-              "|---|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Escalation",
+        "",
+        "| system | precision | recall | missed | needless | cost/100 (10:1) |",
+        "|---|---|---|---|---|---|",
+    ]
     for name, r in results["systems"].items():
         e = r["escalation"]["balanced"]
-        lines.append(f"| {name} | {e['precision']:.3f} | {e['recall']:.3f} | "
-                     f"{e['missed_escalations']} | {e['needless_escalations']} | "
-                     f"{e['cost_per_100']:.1f} |")
+        lines.append(
+            f"| {name} | {e['precision']:.3f} | {e['recall']:.3f} | "
+            f"{e['missed_escalations']} | {e['needless_escalations']} | "
+            f"{e['cost_per_100']:.1f} |"
+        )
 
-    lines += ["", "### Cost sensitivity", "",
-              "Ratio = cost of a missed escalation vs a needless one. Lower is better.", "",
-              "| system | " + " | ".join(f"{r:g}:1" for r in COST_RATIOS) + " |",
-              "|---|" + "---|" * len(COST_RATIOS)]
+    lines += [
+        "",
+        "### Cost sensitivity",
+        "",
+        "Ratio = cost of a missed escalation vs a needless one. Lower is better.",
+        "",
+        "| system | " + " | ".join(f"{r:g}:1" for r in COST_RATIOS) + " |",
+        "|---|" + "---|" * len(COST_RATIOS),
+    ]
     for name, r in results["systems"].items():
-        lines.append(f"| {name} | " + " | ".join(
-            f"{v:.1f}" for v in r["escalation"]["cost_sweep"].values()) + " |")
+        lines.append(
+            f"| {name} | "
+            + " | ".join(f"{v:.1f}" for v in r["escalation"]["cost_sweep"].values())
+            + " |"
+        )
 
     # Headers derived from RUBRIC, never hardcoded: they were hardcoded once and
     # silently mislabelled every column after the rubric criteria changed.
     crit = [k.replace("_", " ")[:12] for k in judge_mod.RUBRIC]
     ncol = len(crit) + 5
-    lines += ["", "## Reply quality (LLM judge, 1-5)", "",
-              "| system | " + " | ".join(crit)
-              + " | mean | interchangeable | drafted | ungrounded |",
-              "|" + "---|" * ncol]
+    lines += [
+        "",
+        "## Reply quality (LLM judge, 1-5)",
+        "",
+        "| system | "
+        + " | ".join(crit)
+        + " | mean | interchangeable | drafted | ungrounded |",
+        "|" + "---|" * ncol,
+    ]
     for name, r in results["systems"].items():
         q = r["reply"]
         # Both branches must yield the same number of cells, or the row's pipes
         # desynchronise from the header and the table silently renders wrong.
-        cells = ([f"{q[k]:.2f}" for k in [*judge_mod.RUBRIC, "mean"]]
-                 if q["mean"] is not None else ["-"] * (len(judge_mod.RUBRIC) + 1))
+        cells = (
+            [f"{q[k]:.2f}" for k in [*judge_mod.RUBRIC, "mean"]]
+            if q["mean"] is not None
+            else ["-"] * (len(judge_mod.RUBRIC) + 1)
+        )
         inter = q.get("interchangeable_rate")
-        lines.append("| " + " | ".join([
-            name, *cells,
-            f"{inter:.0%}" if inter is not None else "-",
-            str(q["n_drafted"]), f"{q['ungrounded_rate']:.1%}",
-        ]) + " |")
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    name,
+                    *cells,
+                    f"{inter:.0%}" if inter is not None else "-",
+                    str(q["n_drafted"]),
+                    f"{q['ungrounded_rate']:.1%}",
+                ]
+            )
+            + " |"
+        )
 
     if results.get("judge_agreement"):
         a = results["judge_agreement"]
@@ -293,15 +351,22 @@ def build_report(results: dict) -> str:
         else:
             lines += [
                 f"- n = {a['n']} rated by hand",
-                f"- Spearman = {a['spearman']:.3f}" if a.get("spearman") is not None
+                f"- Spearman = {a['spearman']:.3f}"
+                if a.get("spearman") is not None
                 else "- Spearman = undefined (no variance)",
                 f"- quadratic kappa = {a['kappa_quadratic']:.3f}",
-                f"- judge bias = {a['judge_bias']:+.2f} "
-                f"({'generous' if a['judge_bias'] > 0 else 'harsh'} vs human)",
+                (
+                    f"- judge bias = {a['judge_bias']:+.2f} "
+                    f"({'generous' if a['judge_bias'] > 0 else 'harsh'} vs human)"
+                ),
                 f"- within 1 point = {a['within_1']:.1%}",
             ]
             if a.get("per_criterion"):
-                lines += ["", "| criterion | human | judge | bias |", "|---|---|---|---|"]
+                lines += [
+                    "",
+                    "| criterion | human | judge | bias |",
+                    "|---|---|---|---|",
+                ]
                 lines += [
                     f"| {k} | {v['human']:.2f} | {v['judge']:.2f} | {v['bias']:+.2f} |"
                     for k, v in a["per_criterion"].items()
@@ -309,12 +374,19 @@ def build_report(results: dict) -> str:
 
     if results.get("cross_family"):
         c = results["cross_family"]
-        lines += ["", "## Cross-family judge check (Gemma vs Gemini)", "", f"- n = {c['n']}"]
+        lines += [
+            "",
+            "## Cross-family judge check (Gemma vs Gemini)",
+            "",
+            f"- n = {c['n']}",
+        ]
         if "note" not in c:
             lines += [
-                f"- Spearman = {c['spearman']:.3f}" if c.get("spearman") is not None
+                f"- Spearman = {c['spearman']:.3f}"
+                if c.get("spearman") is not None
                 else "- Spearman = undefined",
-                f"- Gemma is {c['judge_bias']:+.2f} vs Gemini", "",
+                f"- Gemma is {c['judge_bias']:+.2f} vs Gemini",
+                "",
                 "Low correlation would mean much of the primary judge's score is",
                 "family-specific taste rather than reply quality.",
             ]
@@ -327,7 +399,8 @@ def build_report(results: dict) -> str:
         else:
             lines += [
                 f"- n = {sc['n']} re-labelled blind",
-                f"- agreement = {sc['agreement']:.3f}, kappa = {sc['kappa']:.3f}", "",
+                f"- agreement = {sc['agreement']:.3f}, kappa = {sc['kappa']:.3f}",
+                "",
                 "No system can be meaningfully scored above this. An intent accuracy",
                 "at or above it is measuring label noise, not skill.",
             ]
@@ -341,10 +414,12 @@ def main() -> None:
     ap.add_argument("--no-judge", action="store_true", help="skip reply scoring")
     ap.add_argument("--cross-family", type=int, default=40, help="0 to skip")
     ap.add_argument(
-        "--judge-sample", type=int, default=90,
+        "--judge-sample",
+        type=int,
+        default=90,
         help="how many golden examples to score for reply quality (0 = all). "
-             "Judging all 180 across three systems exceeds the free-tier daily cap; "
-             "90 is enough for a stable mean and keeps a fresh run inside one day.",
+        "Judging all 180 across three systems exceeds the free-tier daily cap; "
+        "90 is enough for a stable mean and keeps a fresh run inside one day.",
     )
     args = ap.parse_args()
 
@@ -389,7 +464,9 @@ def main() -> None:
             "reply": _reply_block(preds, scores),
         }
 
-    results["judge_agreement"] = judge_agreement(golden, systems["agent"], all_scores["agent"])
+    results["judge_agreement"] = judge_agreement(
+        golden, systems["agent"], all_scores["agent"]
+    )
     results["self_consistency"] = annotator_self_consistency(golden)
 
     if args.cross_family and not args.no_judge:
@@ -400,12 +477,12 @@ def main() -> None:
         agent_dicts = [t.to_dict() for t in systems["agent"]][: args.cross_family]
         alt = judge_mod.judge_replies(agent_dicts, model=llm.ALT_JUDGE, batch_size=3)
         pairs = [
-            (p["mean"], a["mean"])
-            for p, a in zip(all_scores["agent"], alt) if p and a
+            (p["mean"], a["mean"]) for p, a in zip(all_scores["agent"], alt) if p and a
         ]
         results["cross_family"] = (
             metrics.agreement([p for p, _ in pairs], [a for _, a in pairs])
-            if len(pairs) >= 10 else {"n": len(pairs), "note": "too few paired scores"}
+            if len(pairs) >= 10
+            else {"n": len(pairs), "note": "too few paired scores"}
         )
 
     REPORTS.mkdir(exist_ok=True)
@@ -415,16 +492,29 @@ def main() -> None:
     # Full per-example output, so failure analysis reads real cases not summaries.
     with (REPORTS / "predictions.jsonl").open("w") as fh:
         for i, g in enumerate(golden):
-            fh.write(json.dumps({
-                "id": g["id"],
-                "message": g["message"],
-                "truth": {"intent": g["intent"], "should_escalate": g["should_escalate"],
-                          "pass": g.get("pass"), "note": g.get("note", "")},
-                "systems": {
-                    name: {**systems[name][i].to_dict(), "judge": all_scores[name][i]}
-                    for name in systems
-                },
-            }, ensure_ascii=False) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "id": g["id"],
+                        "message": g["message"],
+                        "truth": {
+                            "intent": g["intent"],
+                            "should_escalate": g["should_escalate"],
+                            "pass": g.get("pass"),
+                            "note": g.get("note", ""),
+                        },
+                        "systems": {
+                            name: {
+                                **systems[name][i].to_dict(),
+                                "judge": all_scores[name][i],
+                            }
+                            for name in systems
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
     print("\n" + build_report(results))
     print(f"wrote {_rel(REPORTS)}/results.{{json,md}} and predictions.jsonl")

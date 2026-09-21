@@ -95,24 +95,30 @@ def show_intent_menu(intents: dict[str, dict]) -> None:
     console.print(table)
 
 
-def ask_label(item: dict, intents: dict[str, dict], suggestion: str | None) -> dict | None:
+def ask_label(
+    item: dict, intents: dict[str, dict], suggestion: str | None
+) -> dict | None:
     """Present one message and collect a label. Returns None to quit."""
     names = list(intents)
     tags = ", ".join(item.get("hard_cases", [])) or "-"
 
-    console.print(Panel(
-        item["message"],
-        title=f"[bold]{item['pass']}[/bold] pass",
-        subtitle=f"hard cases: {tags}",
-        border_style="cyan" if item["pass"] == "blind" else "yellow",
-    ))
+    console.print(
+        Panel(
+            item["message"],
+            title=f"[bold]{item['pass']}[/bold] pass",
+            subtitle=f"hard cases: {tags}",
+            border_style="cyan" if item["pass"] == "blind" else "yellow",
+        )
+    )
     if suggestion:
         console.print(f"  model suggests: [magenta]{suggestion}[/magenta]")
 
     while True:
-        raw = console.input(
-            f"  intent [1-{len(names)}] (s=skip, q=save+quit, ?=menu): "
-        ).strip().lower()
+        raw = (
+            console.input(f"  intent [1-{len(names)}] (s=skip, q=save+quit, ?=menu): ")
+            .strip()
+            .lower()
+        )
         if raw == "q":
             return None
         if raw == "s":
@@ -191,7 +197,9 @@ def label_intents(only_pass: str | None = None) -> None:
             hint = suggestions.get(item["id"])
         record = ask_label(item, intents, hint)
         if record is None:
-            console.print(f"\n[yellow]saved. {len(done)}/{len(items)} labelled.[/yellow]")
+            console.print(
+                f"\n[yellow]saved. {len(done)}/{len(items)} labelled.[/yellow]"
+            )
             return
         if record:
             append_jsonl(GOLDEN, record)
@@ -208,7 +216,6 @@ def _load_suggestions(todo: list[dict]) -> dict[int, str]:
 
     from genius_bar import llm as llm_mod
     from genius_bar.agent import classify
-
     from genius_bar.llm import MIN_INTERVAL
 
     batches = -(-len(assisted) // 30)
@@ -219,8 +226,12 @@ def _load_suggestions(todo: list[dict]) -> dict[int, str]:
     )
     try:
         preds = classify([i["message"] for i in assisted], model=llm_mod.SUGGEST)
-    except Exception as exc:  # quota, network -- labelling should still proceed
-        detail = "daily quota exhausted" if "429" in str(exc) else str(exc).splitlines()[0][:90]
+    except Exception as exc:  # noqa: BLE001 - any failure here must not end the session
+        detail = (
+            "daily quota exhausted"
+            if "429" in str(exc)
+            else str(exc).splitlines()[0][:90]
+        )
         console.print(
             f"[yellow]could not pre-label: {detail}[/yellow]\n"
             "[yellow]Continuing WITHOUT suggestions. These labels are then "
@@ -251,13 +262,16 @@ def recheck(n: int) -> None:
         console.print(f"[green]recheck complete ({len(already)} examples).[/green]")
         return
 
-    console.print(Panel(
-        "Re-labelling examples you have already done, with your original answer "
-        "hidden.\nDisagreement here is not a mistake -- it measures how noisy the "
-        "task itself is,\nand that noise is the ceiling on any score reported "
-        "against these labels.",
-        title="self-consistency recheck", border_style="magenta",
-    ))
+    console.print(
+        Panel(
+            "Re-labelling examples you have already done, with your original answer "
+            "hidden.\nDisagreement here is not a mistake -- it measures how noisy the "
+            "task itself is,\nand that noise is the ceiling on any score reported "
+            "against these labels.",
+            title="self-consistency recheck",
+            border_style="magenta",
+        )
+    )
     show_intent_menu(intents)
 
     for i, item in enumerate(todo, 1):
@@ -300,7 +314,8 @@ def rate_replies(n: int = 40) -> None:
 
     # Blind-pass examples first, and only drafts that actually exist.
     candidates = [
-        r for r in rows
+        r
+        for r in rows
         if r["id"] not in done and r["systems"]["agent"].get("draft", "").strip()
     ]
     candidates.sort(key=lambda r: 0 if r["truth"].get("pass") == "blind" else 1)
@@ -310,20 +325,27 @@ def rate_replies(n: int = 40) -> None:
         console.print(f"[green]{len(done)} replies already rated.[/green]")
         return
 
-    console.print(Panel(
-        "Score each reply 1-5 on four criteria. The model's own scores are\n"
-        "hidden, and so is which system wrote the draft.\n\n"
-        + "\n".join(f"[bold]{k}[/bold]: {v.splitlines()[0]}" for k, v in RUBRIC.items())
-        + "\n\nUse the full 1-5 range. Rating everything 3 makes the correlation\n"
-          "meaningless, which defeats the point of doing this by hand.",
-        title="reply rating", border_style="green",
-    ))
+    console.print(
+        Panel(
+            "Score each reply 1-5 on four criteria. The model's own scores are\n"
+            "hidden, and so is which system wrote the draft.\n\n"
+            + "\n".join(
+                f"[bold]{k}[/bold]: {v.splitlines()[0]}" for k, v in RUBRIC.items()
+            )
+            + "\n\nUse the full 1-5 range. Rating everything 3 makes the correlation\n"
+            "meaningless, which defeats the point of doing this by hand.",
+            title="reply rating",
+            border_style="green",
+        )
+    )
 
     for i, row in enumerate(todo, 1):
         console.rule(f"{i}/{len(todo)}  (rated: {len(done)})")
         agent = row["systems"]["agent"]
         console.print(Panel(row["message"], title="customer", border_style="cyan"))
-        console.print(Panel(agent["draft"], title="proposed reply", border_style="yellow"))
+        console.print(
+            Panel(agent["draft"], title="proposed reply", border_style="yellow")
+        )
         for j, e in enumerate(agent.get("evidence", [])[:3], 1):
             console.print(f"  precedent {j}: [dim]{e['reply'][:140]}[/dim]")
 
@@ -331,7 +353,11 @@ def rate_replies(n: int = 40) -> None:
         quit_now = False
         for criterion in RUBRIC:
             while True:
-                raw = console.input(f"  {criterion} [1-5] (q=save+quit): ").strip().lower()
+                raw = (
+                    console.input(f"  {criterion} [1-5] (q=save+quit): ")
+                    .strip()
+                    .lower()
+                )
                 if raw == "q":
                     quit_now = True
                     break
@@ -345,11 +371,14 @@ def rate_replies(n: int = 40) -> None:
             console.print(f"\n[yellow]saved. {len(done)} rated.[/yellow]")
             return
 
-        append_jsonl(REPLY_RATINGS, {
-            "id": row["id"],
-            **scores,
-            "mean": sum(scores.values()) / len(scores),
-        })
+        append_jsonl(
+            REPLY_RATINGS,
+            {
+                "id": row["id"],
+                **scores,
+                "mean": sum(scores.values()) / len(scores),
+            },
+        )
         done.add(row["id"])
 
     console.print(f"[green]done: {len(done)} replies rated.[/green]")

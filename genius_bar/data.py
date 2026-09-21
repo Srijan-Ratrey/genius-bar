@@ -49,7 +49,9 @@ def find_raw_csv() -> Path:
     path = Path(kagglehub.dataset_download(KAGGLE_DATASET))
     hits = list(path.glob("**/twcs*.csv"))
     if not hits:
-        raise SystemExit(f"Downloaded {KAGGLE_DATASET} but found no twcs csv under {path}")
+        raise SystemExit(
+            f"Downloaded {KAGGLE_DATASET} but found no twcs csv under {path}"
+        )
     return hits[0]
 
 
@@ -98,7 +100,11 @@ def build_brand_threads(
     graph = pd.read_csv(
         csv_path,
         usecols=["tweet_id", "author_id", "in_response_to_tweet_id"],
-        dtype={"tweet_id": "int64", "author_id": "string", "in_response_to_tweet_id": "float64"},
+        dtype={
+            "tweet_id": "int64",
+            "author_id": "string",
+            "in_response_to_tweet_id": "float64",
+        },
     )
 
     linked = graph.dropna(subset=["in_response_to_tweet_id"])
@@ -134,7 +140,15 @@ def build_brand_threads(
     df = df.sort_values(["thread_id", "created_at", "tweet_id"], ignore_index=True)
     df["turn"] = df.groupby("thread_id").cumcount()
 
-    cols = ["thread_id", "turn", "tweet_id", "author_id", "inbound", "created_at", "text"]
+    cols = [
+        "thread_id",
+        "turn",
+        "tweet_id",
+        "author_id",
+        "inbound",
+        "created_at",
+        "text",
+    ]
     return df[cols]
 
 
@@ -211,8 +225,10 @@ def main() -> None:
     print(f"wrote {THREADS_PARQUET.relative_to(REPO_ROOT)}  ({size_mb:.1f} MB)")
     print(f"  threads: {df['thread_id'].nunique():,}")
     print(f"  tweets:  {len(df):,}  ({df['inbound'].sum():,} inbound)")
-    print(f"  turns/thread: median {df.groupby('thread_id').size().median():.0f}, "
-          f"max {df.groupby('thread_id').size().max()}")
+    print(
+        f"  turns/thread: median {df.groupby('thread_id').size().median():.0f}, "
+        f"max {df.groupby('thread_id').size().max()}"
+    )
 
 
 if __name__ == "__main__":

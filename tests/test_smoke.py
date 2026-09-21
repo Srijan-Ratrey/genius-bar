@@ -9,6 +9,7 @@ import pytest
 
 from genius_bar.data import build_brand_threads
 
+
 # All timestamps are a real Wednesday so the %a in CREATED_AT_FMT matches.
 def _at(hour: int) -> str:
     return f"Wed Nov 01 {hour:02d}:00:00 +0000 2017"
@@ -29,7 +30,15 @@ def csv(tmp_path):
         (3, "cust1", True, _at(12), "still broken", 4.0, 2.0),
         (1, "cust1", True, _at(10), "my iphone won't charge", 2.0, None),
         (4, "AppleSupport", False, _at(13), "let's take this to DM", None, 3.0),
-        (2, "AppleSupport", False, _at(11), "have you tried a different cable?", 3.0, 1.0),
+        (
+            2,
+            "AppleSupport",
+            False,
+            _at(11),
+            "have you tried a different cable?",
+            3.0,
+            1.0,
+        ),
         # thread B, no AppleSupport anywhere
         (10, "cust2", True, _at(10), "hey spotify", 11.0, None),
         (11, "SpotifyCares", False, _at(11), "we're on it", None, 10.0),
@@ -40,8 +49,13 @@ def csv(tmp_path):
     df = pd.DataFrame(
         rows,
         columns=[
-            "tweet_id", "author_id", "inbound", "created_at",
-            "text", "response_tweet_id", "in_response_to_tweet_id",
+            "tweet_id",
+            "author_id",
+            "inbound",
+            "created_at",
+            "text",
+            "response_tweet_id",
+            "in_response_to_tweet_id",
         ],
     )
     path = tmp_path / "twcs.csv"
@@ -86,7 +100,7 @@ def test_subsample_is_deterministic(csv):
 # These guard the reproduce claim: `make eval` must recompute every headline
 # number from committed cache with no API key present.
 
-from genius_bar import llm  # noqa: E402
+from genius_bar import llm
 
 
 @pytest.fixture
@@ -152,11 +166,17 @@ def test_batch_misalignment_is_recovered_by_bisecting(monkeypatch):
 
 def test_bisect_terminates_on_a_pathological_model(monkeypatch):
     """Even a model that always returns short must not loop or lose items."""
-    monkeypatch.setattr(llm, "generate", lambda prompt, schema, model=None, thinking=0: (
-        [{"v": 1}] * max(0, prompt.count("|") - 1)
-    ))
+    monkeypatch.setattr(
+        llm,
+        "generate",
+        lambda prompt, schema, model=None, thinking=0: (
+            [{"v": 1}] * max(0, prompt.count("|") - 1)
+        ),
+    )
     out = llm.map_batched(
-        ["a", "b", "c"], lambda b: "".join(f"|{x}" for x in b), {"type": "object"},
+        ["a", "b", "c"],
+        lambda b: "".join(f"|{x}" for x in b),
+        {"type": "object"},
         batch_size=3,
     )
     assert len(out) == 3
@@ -164,7 +184,7 @@ def test_bisect_terminates_on_a_pathological_model(monkeypatch):
 
 # --- metrics ---------------------------------------------------------------
 
-from genius_bar import metrics  # noqa: E402
+from genius_bar import metrics
 
 
 def test_escalation_cost_is_asymmetric():
@@ -238,11 +258,19 @@ def test_rate_limited_batch_is_retried_whole_not_split(monkeypatch):
             seen.append(len(contents))
             if len(seen) == 1:
                 raise Exception(RATE_LIMIT_ERR)
-            return type("R", (), {
-                "embeddings": [type("E", (), {"values": [0.0, 1.0]})() for _ in contents]
-            })()
+            return type(
+                "R",
+                (),
+                {
+                    "embeddings": [
+                        type("E", (), {"values": [0.0, 1.0]})() for _ in contents
+                    ]
+                },
+            )()
 
-    monkeypatch.setattr(llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})())
+    monkeypatch.setattr(
+        llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})()
+    )
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
     monkeypatch.setattr(llm, "EMBED_MIN_INTERVAL", 0.0)
 
@@ -260,11 +288,19 @@ def test_oversized_batch_is_split(monkeypatch):
             seen.append(len(contents))
             if len(contents) > 20:
                 raise Exception(TOO_LARGE_ERR)
-            return type("R", (), {
-                "embeddings": [type("E", (), {"values": [0.0, 1.0]})() for _ in contents]
-            })()
+            return type(
+                "R",
+                (),
+                {
+                    "embeddings": [
+                        type("E", (), {"values": [0.0, 1.0]})() for _ in contents
+                    ]
+                },
+            )()
 
-    monkeypatch.setattr(llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})())
+    monkeypatch.setattr(
+        llm, "_get_client", lambda: type("C", (), {"models": FakeModels()})()
+    )
     monkeypatch.setattr(llm, "EMBED_MIN_INTERVAL", 0.0)
 
     out = llm._embed_live(["a"] * 40, "m", 2)
@@ -277,15 +313,26 @@ def test_oversized_batch_is_split(monkeypatch):
 # The component where a silent bug is most expensive: a wrongly auto-handled
 # payment dispute or safety report is an incident, not a metric regression.
 
-from genius_bar.agent import MIN_CONFIDENCE, MIN_EVIDENCE_SCORE, decide, load_intents  # noqa: E402
+from genius_bar.agent import (
+    MIN_CONFIDENCE,
+    MIN_EVIDENCE_SCORE,
+    decide,
+    load_intents,
+)
 
 CONFIDENT, GROUNDED = 0.95, 0.40
 
 
-@pytest.mark.parametrize("signal", [
-    "safety_risk", "legal_or_press_threat", "payment_dispute",
-    "irreversible_data_loss", "non_english",
-])
+@pytest.mark.parametrize(
+    "signal",
+    [
+        "safety_risk",
+        "legal_or_press_threat",
+        "payment_dispute",
+        "irreversible_data_loss",
+        "non_english",
+    ],
+)
 def test_hard_signals_escalate_even_when_confident_and_grounded(signal):
     action, reason = decide("update_performance", CONFIDENT, [signal], GROUNDED)
     assert action == "escalate", f"{signal} was auto-handled"
@@ -315,7 +362,9 @@ def test_low_confidence_escalates():
 
 def test_ungrounded_draft_escalates():
     """No precedent means a "grounded" draft would be grounded in noise."""
-    action, reason = decide("update_performance", CONFIDENT, [], MIN_EVIDENCE_SCORE - 0.01)
+    action, reason = decide(
+        "update_performance", CONFIDENT, [], MIN_EVIDENCE_SCORE - 0.01
+    )
     assert action == "escalate" and "precedent" in reason
 
 
@@ -351,19 +400,29 @@ def test_ungrounded_support_draft_is_downgraded_to_escalate(monkeypatch):
     """
     from genius_bar import agent
 
-    monkeypatch.setattr(agent, "classify", lambda m, **kw: [
-        {"intent": "update_performance", "confidence": 0.95, "signals": []},
-        {"intent": "not_actionable", "confidence": 0.95, "signals": []},
-    ])
-    monkeypatch.setattr(agent, "draft", lambda items, **kw: [
-        {"draft": "Have you tried restarting?", "used_evidence": []} for _ in items
-    ])
+    monkeypatch.setattr(
+        agent,
+        "classify",
+        lambda m, **kw: [
+            {"intent": "update_performance", "confidence": 0.95, "signals": []},
+            {"intent": "not_actionable", "confidence": 0.95, "signals": []},
+        ],
+    )
+    monkeypatch.setattr(
+        agent,
+        "draft",
+        lambda items, **kw: [
+            {"draft": "Have you tried restarting?", "used_evidence": []} for _ in items
+        ],
+    )
 
     class FakeRetriever:
         def search(self, q, k=5):
             return [{"customer": "c", "reply": "r", "score": 0.9}]
 
-    support, venting = agent.triage(["battery dies fast", "you all suck"], FakeRetriever())
+    support, venting = agent.triage(
+        ["battery dies fast", "you all suck"], FakeRetriever()
+    )
 
     assert support.action == "escalate" and "not grounded" in support.reason
     assert venting.action == "auto", "not_actionable needs no precedent to cite"
@@ -372,7 +431,7 @@ def test_ungrounded_support_draft_is_downgraded_to_escalate(monkeypatch):
 
 # --- baselines -------------------------------------------------------------
 
-from genius_bar import baselines  # noqa: E402
+from genius_bar import baselines
 
 
 def test_trivial_baseline_never_escalates_and_is_one_reply():
@@ -388,13 +447,21 @@ def test_baseline_rules_are_ordered_specific_before_catch_all():
     "all my contacts are gone after updating" contains "updating"; if the
     catch-all ran first it would swallow the data_loss case.
     """
-    assert baselines.classify_by_rules("all my contacts are gone after updating") == "data_loss"
-    assert baselines.classify_by_rules("refund my iTunes charge from the update") == "account_billing"
+    assert (
+        baselines.classify_by_rules("all my contacts are gone after updating")
+        == "data_loss"
+    )
+    assert (
+        baselines.classify_by_rules("refund my iTunes charge from the update")
+        == "account_billing"
+    )
 
 
 def test_baseline_escalates_high_risk_intents_too():
     """Kept comparable to the agent, so escalation metrics measure signal quality."""
-    action, reason = baselines.escalate_by_rules("been to the genius bar 4 times", "hardware_repair")
+    action, reason = baselines.escalate_by_rules(
+        "been to the genius bar 4 times", "hardware_repair"
+    )
     assert action == "escalate" and "high-risk" in reason
 
 
@@ -409,7 +476,7 @@ def test_simple_baseline_copies_verbatim_and_does_not_synthesise():
 
 # --- labelling --------------------------------------------------------------
 
-from genius_bar import label  # noqa: E402
+from genius_bar import label
 
 
 def test_blind_pass_gets_no_model_suggestions():
@@ -439,8 +506,8 @@ def test_jsonl_round_trip_appends(tmp_path):
 
 # --- report rendering ------------------------------------------------------
 
-from genius_bar import eval as ev  # noqa: E402
-from genius_bar import judge as judge_mod  # noqa: E402
+from genius_bar import eval as ev
+from genius_bar import judge as judge_mod
 
 
 def test_report_rows_match_header_width_when_a_system_is_unjudged():
@@ -450,24 +517,41 @@ def test_report_rows_match_header_width_when_a_system_is_unjudged():
     renders a silently wrong table, which is the worst failure mode for a
     file whose whole purpose is reporting numbers honestly.
     """
+
     def block(judged):
         scores = {k: (3.5 if judged else None) for k in [*judge_mod.RUBRIC, "mean"]}
         return {
-            "intent": {"balanced": {"accuracy": 0.5, "macro_f1": 0.4},
-                       "weighted": {"accuracy": 0.5}},
-            "escalation": {"balanced": {"precision": 0.5, "recall": 0.5,
-                                        "missed_escalations": 1,
-                                        "needless_escalations": 2,
-                                        "cost_per_100": 10.0},
-                           "cost_sweep": {"3:1": 1.0, "10:1": 2.0, "30:1": 3.0}},
-            "reply": {"n_drafted": 5, "ungrounded_rate": 0.1, "over_limit": 0,
-                      "interchangeable_rate": 0.2 if judged else None, **scores},
+            "intent": {
+                "balanced": {"accuracy": 0.5, "macro_f1": 0.4},
+                "weighted": {"accuracy": 0.5},
+            },
+            "escalation": {
+                "balanced": {
+                    "precision": 0.5,
+                    "recall": 0.5,
+                    "missed_escalations": 1,
+                    "needless_escalations": 2,
+                    "cost_per_100": 10.0,
+                },
+                "cost_sweep": {"3:1": 1.0, "10:1": 2.0, "30:1": 3.0},
+            },
+            "reply": {
+                "n_drafted": 5,
+                "ungrounded_rate": 0.1,
+                "over_limit": 0,
+                "interchangeable_rate": 0.2 if judged else None,
+                **scores,
+            },
         }
 
-    md = ev.build_report({
-        "n": 10, "n_blind": 5, "n_assisted": 5,
-        "systems": {"trivial": block(False), "agent": block(True)},
-    })
+    md = ev.build_report(
+        {
+            "n": 10,
+            "n_blind": 5,
+            "n_assisted": 5,
+            "systems": {"trivial": block(False), "agent": block(True)},
+        }
+    )
 
     # Located by section, not by column names: hardcoding the header is what
     # let it silently mislabel every column when the rubric criteria changed.
@@ -477,7 +561,9 @@ def test_report_rows_match_header_width_when_a_system_is_unjudged():
     width = header.count("|")
     for line in md.splitlines():
         if line.startswith(("| trivial |", "| agent |")) and "%" in line:
-            assert line.count("|") == width, f"row width {line.count('|')} != {width}: {line}"
+            assert line.count("|") == width, (
+                f"row width {line.count('|')} != {width}: {line}"
+            )
     assert "| |" not in md, "empty cell from a desynchronised row"
 
 
@@ -490,20 +576,48 @@ def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
     """
     import sys
 
-    from genius_bar import agent, eval as ev, judge as judge_mod
+    from genius_bar import agent
+    from genius_bar import eval as ev
+    from genius_bar import judge as judge_mod
 
     golden = tmp_path / "golden.jsonl"
-    golden.write_text("\n".join(json.dumps(r) for r in [
-        {"id": 1, "message": "battery drains since the update", "intent": "update_performance",
-         "should_escalate": False, "pass": "blind", "proxy_intent": "update_performance",
-         "weight": 12.0, "hard_cases": []},
-        {"id": 2, "message": "unauthorized charges on my itunes account", "intent": "account_billing",
-         "should_escalate": True, "pass": "blind", "proxy_intent": "account_billing",
-         "weight": 1.5, "hard_cases": []},
-        {"id": 3, "message": "all my contacts vanished", "intent": "data_loss",
-         "should_escalate": True, "pass": "assisted", "proxy_intent": "data_loss",
-         "weight": 1.8, "hard_cases": ["very_short"]},
-    ]))
+    golden.write_text(
+        "\n".join(
+            json.dumps(r)
+            for r in [
+                {
+                    "id": 1,
+                    "message": "battery drains since the update",
+                    "intent": "update_performance",
+                    "should_escalate": False,
+                    "pass": "blind",
+                    "proxy_intent": "update_performance",
+                    "weight": 12.0,
+                    "hard_cases": [],
+                },
+                {
+                    "id": 2,
+                    "message": "unauthorized charges on my itunes account",
+                    "intent": "account_billing",
+                    "should_escalate": True,
+                    "pass": "blind",
+                    "proxy_intent": "account_billing",
+                    "weight": 1.5,
+                    "hard_cases": [],
+                },
+                {
+                    "id": 3,
+                    "message": "all my contacts vanished",
+                    "intent": "data_loss",
+                    "should_escalate": True,
+                    "pass": "assisted",
+                    "proxy_intent": "data_loss",
+                    "weight": 1.8,
+                    "hard_cases": ["very_short"],
+                },
+            ]
+        )
+    )
 
     class FakeRetriever:
         corpus = {"reply_clean": []}
@@ -512,7 +626,13 @@ def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
             return 0
 
         def search(self, q, k=5):
-            return [{"customer": "battery dies", "reply": "Which iOS version?", "score": 0.42}]
+            return [
+                {
+                    "customer": "battery dies",
+                    "reply": "Which iOS version?",
+                    "score": 0.42,
+                }
+            ]
 
     monkeypatch.setattr(ev, "GOLDEN", golden)
     monkeypatch.setattr(ev, "REPORTS", tmp_path / "reports")
@@ -521,19 +641,37 @@ def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
     monkeypatch.setattr(ev, "Retriever", lambda *a, **k: FakeRetriever())
 
     # No API: fixed classifications, drafts and judge scores.
-    monkeypatch.setattr(agent, "classify", lambda msgs, **kw: [
-        {"intent": "update_performance", "confidence": 0.95, "signals": []},
-        {"intent": "account_billing", "confidence": 0.9, "signals": ["payment_dispute"]},
-        {"intent": "data_loss", "confidence": 0.8, "signals": []},
-    ][: len(msgs)])
-    monkeypatch.setattr(agent, "draft", lambda items, **kw: [
-        {"draft": "Which iOS version are you on?", "used_evidence": [1]} for _ in items
-    ])
-    monkeypatch.setattr(judge_mod, "judge_replies", lambda items, **kw: [
-        ({k: 4 for k in judge_mod.RUBRIC} | {"mean": 4.0, "worst_problem": "terse"})
-        if it.get("draft", "").strip() else None
-        for it in items
-    ])
+    monkeypatch.setattr(
+        agent,
+        "classify",
+        lambda msgs, **kw: [
+            {"intent": "update_performance", "confidence": 0.95, "signals": []},
+            {
+                "intent": "account_billing",
+                "confidence": 0.9,
+                "signals": ["payment_dispute"],
+            },
+            {"intent": "data_loss", "confidence": 0.8, "signals": []},
+        ][: len(msgs)],
+    )
+    monkeypatch.setattr(
+        agent,
+        "draft",
+        lambda items, **kw: [
+            {"draft": "Which iOS version are you on?", "used_evidence": [1]}
+            for _ in items
+        ],
+    )
+    monkeypatch.setattr(
+        judge_mod,
+        "judge_replies",
+        lambda items, **kw: [
+            ({k: 4 for k in judge_mod.RUBRIC} | {"mean": 4.0, "worst_problem": "terse"})
+            if it.get("draft", "").strip()
+            else None
+            for it in items
+        ],
+    )
     monkeypatch.setattr(sys, "argv", ["eval", "--cross-family", "0"])
 
     ev.main()
@@ -543,8 +681,10 @@ def test_eval_main_runs_end_to_end(tmp_path, monkeypatch):
     assert results["n"] == 3
 
     # The agent must escalate both high-risk cases and auto-handle the routine one.
-    preds = [json.loads(l) for l in
-             (tmp_path / "reports" / "predictions.jsonl").read_text().splitlines()]
+    preds = [
+        json.loads(l)
+        for l in (tmp_path / "reports" / "predictions.jsonl").read_text().splitlines()
+    ]
     actions = {p["id"]: p["systems"]["agent"]["action"] for p in preds}
     assert actions == {1: "auto", 2: "escalate", 3: "escalate"}
 

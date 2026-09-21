@@ -44,17 +44,27 @@ def intent_metrics(
     """
     labels = sorted(set(y_true) | set(y_pred))
     per_class = f1_score(
-        y_true, y_pred, labels=labels, average=None, zero_division=0,
+        y_true,
+        y_pred,
+        labels=labels,
+        average=None,
+        zero_division=0,
         sample_weight=sample_weight,
     )
     correct = np.array([t == p for t, p in zip(y_true, y_pred)], dtype=float)
     return {
         "n": len(y_true),
         "accuracy": float(np.average(correct, weights=sample_weight)),
-        "macro_f1": float(f1_score(
-            y_true, y_pred, labels=labels, average="macro", zero_division=0,
-            sample_weight=sample_weight,
-        )),
+        "macro_f1": float(
+            f1_score(
+                y_true,
+                y_pred,
+                labels=labels,
+                average="macro",
+                zero_division=0,
+                sample_weight=sample_weight,
+            )
+        ),
         "per_class_f1": {lab: float(s) for lab, s in zip(labels, per_class)},
         "labels": labels,
         "confusion": confusion_matrix(y_true, y_pred, labels=labels).tolist(),
@@ -76,8 +86,8 @@ def escalation_metrics(
     t = np.asarray(y_true, dtype=bool)
     p = np.asarray(y_pred, dtype=bool)
 
-    missed = int((t & ~p).sum())      # should have escalated, auto-handled it
-    needless = int((~t & p).sum())    # could have auto-handled, escalated anyway
+    missed = int((t & ~p).sum())  # should have escalated, auto-handled it
+    needless = int((~t & p).sum())  # could have auto-handled, escalated anyway
 
     precision, recall, f1, _ = precision_recall_fscore_support(
         t, p, average="binary", zero_division=0, sample_weight=sample_weight
@@ -129,7 +139,9 @@ def agreement(human: list[float], judge: list[float]) -> dict:
 
     # Quadratic weights: being 3 points off is much worse than 1 point off.
     out["kappa_quadratic"] = float(
-        cohen_kappa_score(h.round().astype(int), j.round().astype(int), weights="quadratic")
+        cohen_kappa_score(
+            h.round().astype(int), j.round().astype(int), weights="quadratic"
+        )
     )
     return out
 

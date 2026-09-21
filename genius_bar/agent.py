@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import functools
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
 
 import yaml
 
@@ -148,7 +147,9 @@ MESSAGES:
 """
 
 
-def classify(messages: list[str], batch_size: int = 30, model: str = llm.PRIMARY) -> list[dict]:
+def classify(
+    messages: list[str], batch_size: int = 30, model: str = llm.PRIMARY
+) -> list[dict]:
     """Intent, confidence and risk signals for each message."""
     raw = llm.map_batched(
         [clean_text(m) for m in messages],
@@ -165,20 +166,26 @@ def classify(messages: list[str], batch_size: int = 30, model: str = llm.PRIMARY
             out.append({"intent": "not_actionable", "confidence": 0.0, "signals": []})
             continue
         intent = item.get("intent", "")
-        out.append({
-            # An off-taxonomy label is a real failure mode; surface it as zero
-            # confidence so the policy escalates rather than trusting it.
-            "intent": intent if intent in valid else "not_actionable",
-            "confidence": 0.0 if intent not in valid else float(item.get("confidence", 0.0)),
-            "signals": [s for s in item.get("signals", []) if s in SIGNALS],
-        })
+        out.append(
+            {
+                # An off-taxonomy label is a real failure mode; surface it as zero
+                # confidence so the policy escalates rather than trusting it.
+                "intent": intent if intent in valid else "not_actionable",
+                "confidence": 0.0
+                if intent not in valid
+                else float(item.get("confidence", 0.0)),
+                "signals": [s for s in item.get("signals", []) if s in SIGNALS],
+            }
+        )
     return out
 
 
 # --- step 2: the escalation policy (no model involved) ---------------------
 
 
-def decide(intent: str, confidence: float, signals: list[str], top_score: float) -> tuple[str, str]:
+def decide(
+    intent: str, confidence: float, signals: list[str], top_score: float
+) -> tuple[str, str]:
     """Map triage output to (action, reason). Pure function, ordered most-severe first."""
     intents = load_intents()
     meta = intents.get(intent, {})
@@ -191,7 +198,10 @@ def decide(intent: str, confidence: float, signals: list[str], top_score: float)
     if "payment_dispute" in sig:
         return "escalate", "disputed charge -- money must not be handled automatically"
     if "irreversible_data_loss" in sig:
-        return "escalate", "possible permanent data loss; recovery depends on backup state"
+        return (
+            "escalate",
+            "possible permanent data loss; recovery depends on backup state",
+        )
     if "non_english" in sig:
         return "escalate", "not in English; this agent drafts English replies only"
 
@@ -205,9 +215,15 @@ def decide(intent: str, confidence: float, signals: list[str], top_score: float)
     if meta.get("risk") == "high":
         return "escalate", f"intent '{intent}' is high-risk by policy"
     if "repeat_contact" in sig:
-        return "escalate", "customer has already asked; the standard reply has failed once"
+        return (
+            "escalate",
+            "customer has already asked; the standard reply has failed once",
+        )
     if confidence < MIN_CONFIDENCE:
-        return "escalate", f"low classifier confidence ({confidence:.2f} < {MIN_CONFIDENCE})"
+        return (
+            "escalate",
+            f"low classifier confidence ({confidence:.2f} < {MIN_CONFIDENCE})",
+        )
     if top_score < MIN_EVIDENCE_SCORE:
         return "escalate", (
             f"no similar precedent found (best match {top_score:.2f} < "
@@ -227,11 +243,14 @@ def _draft_prompt(batch: list[tuple[str, str, list[dict]]]) -> str:
     blocks = []
     for n, (message, intent, evidence) in enumerate(batch, 1):
         meta = intents.get(intent, {})
-        examples = "\n".join(
-            f"    {i}. customer: {e['customer'][:200]}\n"
-            f"       Apple replied: {e['reply'][:250]}"
-            for i, e in enumerate(evidence, 1)
-        ) or "    (no similar precedent found)"
+        examples = (
+            "\n".join(
+                f"    {i}. customer: {e['customer'][:200]}\n"
+                f"       Apple replied: {e['reply'][:250]}"
+                for i, e in enumerate(evidence, 1)
+            )
+            or "    (no similar precedent found)"
+        )
         blocks.append(
             f"--- MESSAGE {n} ---\n"
             f"customer: {message}\n"
@@ -269,10 +288,14 @@ Return one object per message, in order.
 
 
 def draft(
-    items: list[tuple[str, str, list[dict]]], batch_size: int = 10, model: str = llm.PRIMARY
+    items: list[tuple[str, str, list[dict]]],
+    batch_size: int = 10,
+    model: str = llm.PRIMARY,
 ) -> list[dict]:
     """Draft replies for (message, intent, evidence) triples."""
-    raw = llm.map_batched(items, _draft_prompt, DRAFT_SCHEMA, batch_size=batch_size, model=model)
+    raw = llm.map_batched(
+        items, _draft_prompt, DRAFT_SCHEMA, batch_size=batch_size, model=model
+    )
     return [r or {"draft": "", "used_evidence": []} for r in raw]
 
 
@@ -300,20 +323,25 @@ def triage(
         evidence = retriever.search(message, k=k)
         top = evidence[0]["score"] if evidence else 0.0
         action, reason = decide(c["intent"], c["confidence"], c["signals"], top)
-        results.append(Triage(
-            message=message,
-            intent=c["intent"],
-            confidence=c["confidence"],
-            signals=c["signals"],
-            action=action,
-            reason=reason,
-            evidence=evidence,
-        ))
+        results.append(
+            Triage(
+                message=message,
+                intent=c["intent"],
+                confidence=c["confidence"],
+                signals=c["signals"],
+                action=action,
+                reason=reason,
+                evidence=evidence,
+            )
+        )
 
     auto = [i for i, r in enumerate(results) if r.action == "auto"]
     if auto:
         drafted = draft(
-            [(results[i].message, results[i].intent, results[i].evidence) for i in auto],
+            [
+                (results[i].message, results[i].intent, results[i].evidence)
+                for i in auto
+            ],
             model=model,
         )
         for i, d in zip(auto, drafted):
@@ -331,6 +359,8 @@ def triage(
             # without troubleshooting is correct behaviour, not a failure.
             if not r.grounded and r.intent != "not_actionable":
                 r.action = "escalate"
-                r.reason = "draft cited no precedent; not grounded despite available evidence"
+                r.reason = (
+                    "draft cited no precedent; not grounded despite available evidence"
+                )
 
     return results

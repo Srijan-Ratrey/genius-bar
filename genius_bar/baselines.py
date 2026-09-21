@@ -35,51 +35,115 @@ MAJORITY_INTENT = "update_performance"
 # ("update", "battery") appear inside messages that are really about something
 # else, so it must be tried last.
 INTENT_RULES: list[tuple[str, re.Pattern]] = [
-    ("account_billing", re.compile(
-        r"refund|billing|invoice|receipt|subscription|unauthoris|unauthoriz|"
-        r"double.?charged|charged me|my card|itunes (card|credit|account)|"
-        r"locked out|cancel my (subscription|plan)", re.I)),
+    (
+        "account_billing",
+        re.compile(
+            r"refund|billing|invoice|receipt|subscription|unauthoris|unauthoriz|"
+            r"double.?charged|charged me|my card|itunes (card|credit|account)|"
+            r"locked out|cancel my (subscription|plan)",
+            re.IGNORECASE,
+        ),
+    ),
     # Both word orders. The first draft only matched verb-then-noun ("lost my
     # contacts") and so missed "all my contacts are gone" -- an obvious phrasing
     # that any engineer writing these rules would have covered. Leaving it
     # broken would have flattered the LLM system by weakening its competition.
-    ("data_loss", re.compile(
-        r"(?:(?:lost|missing|deleted|gone|wiped|erased|disappear\w*)\W+(?:\w+\W+){0,6}?"
-        r"(?:photos?|contacts?|music|songs|data|notes|messages|backup|library)"
-        r"|(?:photos?|contacts?|music|songs|data|notes|messages|backup|library)"
-        r"\W+(?:\w+\W+){0,5}?(?:lost|missing|deleted|gone|wiped|erased|disappear\w*))", re.I)),
-    ("autocorrect_bug", re.compile(
-        r"i⁠️|autocorrect|auto-correct|question mark|glitch"
-        r"|keyboard\W+(?:\w+\W+){0,3}?(?:bug|glitch|issue)"
-        r"|(?:the )?letter\s+.?i\b|[\"\']i[\"\']", re.I)),
-    ("hardware_repair", re.compile(
-        r"genius bar|warranty|apple ?care|repair|replac(e|ed|ement)|"
-        r"cracked screen|screen (is )?crack|water damage", re.I)),
-    ("device_crash_reboot", re.compile(
-        r"keeps? restarting|restart(s|ing)? (itself|randomly|constantly)|"
-        r"reboot|shut(s|ting)? (down|off) (randomly|by itself)|"
-        r"won'?t turn on|overheat|boiling hot", re.I)),
-    ("app_or_service_issue", re.compile(
-        r"app ?store|icloud|apple music|itunes|safari|imessage|facetime|"
-        r"apple pay|siri|mail app|sync(ing)?|won'?t (open|load|download|install)", re.I)),
-    ("update_performance", re.compile(
-        r"ios ?11|update|battery|drain|freez|slow|lag|charge", re.I)),
+    (
+        "data_loss",
+        re.compile(
+            r"(?:(?:lost|missing|deleted|gone|wiped|erased|disappear\w*)\W+(?:\w+\W+){0,6}?"
+            r"(?:photos?|contacts?|music|songs|data|notes|messages|backup|library)"
+            r"|(?:photos?|contacts?|music|songs|data|notes|messages|backup|library)"
+            r"\W+(?:\w+\W+){0,5}?(?:lost|missing|deleted|gone|wiped|erased|disappear\w*))",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "autocorrect_bug",
+        re.compile(
+            r"i⁠️|autocorrect|auto-correct|question mark|glitch"
+            r"|keyboard\W+(?:\w+\W+){0,3}?(?:bug|glitch|issue)"
+            r"|(?:the )?letter\s+.?i\b|[\"\']i[\"\']",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "hardware_repair",
+        re.compile(
+            r"genius bar|warranty|apple ?care|repair|replac(e|ed|ement)|"
+            r"cracked screen|screen (is )?crack|water damage",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "device_crash_reboot",
+        re.compile(
+            r"keeps? restarting|restart(s|ing)? (itself|randomly|constantly)|"
+            r"reboot|shut(s|ting)? (down|off) (randomly|by itself)|"
+            r"won'?t turn on|overheat|boiling hot",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "app_or_service_issue",
+        re.compile(
+            r"app ?store|icloud|apple music|itunes|safari|imessage|facetime|"
+            r"apple pay|siri|mail app|sync(ing)?|won'?t (open|load|download|install)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "update_performance",
+        re.compile(
+            r"ios ?11|update|battery|drain|freez|slow|lag|charge", re.IGNORECASE
+        ),
+    ),
 ]
 
 # What a team would write before building anything cleverer.
 ESCALATE_RULES: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"refund|unauthoris|unauthoriz|charged me|double.?charged|"
-                r"my card|fraud", re.I), "keyword rule: payment or refund"),
-    (re.compile(r"lawyer|sue|legal|attorney|consumer rights|ombudsman|"
-                r"trading standards|press|journalist", re.I), "keyword rule: legal or press"),
-    (re.compile(r"overheat|boiling|burn(ed|t|ing)?|caught fire|swollen|"
-                r"exploded", re.I), "keyword rule: safety"),
-    (re.compile(r"(?:(?:lost|deleted|wiped|gone|missing)\W+(?:\w+\W+){0,6}?"
-                r"(?:photos?|contacts?|data|backup)"
-                r"|(?:photos?|contacts?|data|backup)\W+(?:\w+\W+){0,5}?"
-                r"(?:lost|deleted|wiped|gone|missing))", re.I), "keyword rule: data loss"),
-    (re.compile(r"third time|3rd time|as i (said|mentioned)|already (told|asked|tried)|"
-                r"still waiting|no (one|response)", re.I), "keyword rule: repeat contact"),
+    (
+        re.compile(
+            r"refund|unauthoris|unauthoriz|charged me|double.?charged|"
+            r"my card|fraud",
+            re.IGNORECASE,
+        ),
+        "keyword rule: payment or refund",
+    ),
+    (
+        re.compile(
+            r"lawyer|sue|legal|attorney|consumer rights|ombudsman|"
+            r"trading standards|press|journalist",
+            re.IGNORECASE,
+        ),
+        "keyword rule: legal or press",
+    ),
+    (
+        re.compile(
+            r"overheat|boiling|burn(ed|t|ing)?|caught fire|swollen|"
+            r"exploded",
+            re.IGNORECASE,
+        ),
+        "keyword rule: safety",
+    ),
+    (
+        re.compile(
+            r"(?:(?:lost|deleted|wiped|gone|missing)\W+(?:\w+\W+){0,6}?"
+            r"(?:photos?|contacts?|data|backup)"
+            r"|(?:photos?|contacts?|data|backup)\W+(?:\w+\W+){0,5}?"
+            r"(?:lost|deleted|wiped|gone|missing))",
+            re.IGNORECASE,
+        ),
+        "keyword rule: data loss",
+    ),
+    (
+        re.compile(
+            r"third time|3rd time|as i (said|mentioned)|already (told|asked|tried)|"
+            r"still waiting|no (one|response)",
+            re.IGNORECASE,
+        ),
+        "keyword rule: repeat contact",
+    ),
 ]
 
 
@@ -108,7 +172,9 @@ def trivial(messages: list[str]) -> list[Triage]:
     ]
 
 
-def classify_by_rules(message: str, fallback: str | None = MAJORITY_INTENT) -> str | None:
+def classify_by_rules(
+    message: str, fallback: str | None = MAJORITY_INTENT
+) -> str | None:
     """First matching rule wins; unmatched messages fall back to `fallback`.
 
     As a CLASSIFIER the fallback is the majority class -- the charitable choice,
@@ -151,7 +217,9 @@ def escalate_by_rules(message: str, intent: str | None = None) -> tuple[str, str
     return "auto", "no escalation keyword matched"
 
 
-def simple(messages: list[str], retriever: Retriever | None = None, k: int = 5) -> list[Triage]:
+def simple(
+    messages: list[str], retriever: Retriever | None = None, k: int = 5
+) -> list[Triage]:
     """Keyword intent, verbatim nearest historical reply, keyword escalation."""
     retriever = retriever or Retriever()
     out = []
@@ -162,18 +230,20 @@ def simple(messages: list[str], retriever: Retriever | None = None, k: int = 5) 
         # Copied verbatim -- no synthesis. This is the control that isolates
         # what the LLM's drafting step actually adds.
         reply = evidence[0]["reply"] if evidence else canned_reply()
-        out.append(Triage(
-            message=m,
-            intent=intent,
-            confidence=1.0,
-            signals=[],
-            action=action,
-            reason=f"simple baseline: {reason}",
-            grounded=bool(evidence),
-            draft=reply if action == "auto" else "",
-            evidence=evidence,
-            used_evidence=[1] if evidence and action == "auto" else [],
-        ))
+        out.append(
+            Triage(
+                message=m,
+                intent=intent,
+                confidence=1.0,
+                signals=[],
+                action=action,
+                reason=f"simple baseline: {reason}",
+                grounded=bool(evidence),
+                draft=reply if action == "auto" else "",
+                evidence=evidence,
+                used_evidence=[1] if evidence and action == "auto" else [],
+            )
+        )
     return out
 
 

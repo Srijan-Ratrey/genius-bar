@@ -72,12 +72,12 @@ JUDGE_SCHEMA = {
         "justification": {
             "type": "string",
             "description": "One sentence naming the single most notable thing "
-                           "about this reply, good or bad. Be concrete.",
+            "about this reply, good or bad. Be concrete.",
         },
         "interchangeable": {
             "type": "boolean",
             "description": "Could this exact reply be sent to a completely "
-                           "different customer message without anyone noticing?",
+            "different customer message without anyone noticing?",
         },
         **{k: {"type": "integer", "description": "1-5"} for k in RUBRIC},
         "worst_problem": {
@@ -93,11 +93,14 @@ def _judge_prompt(batch: list[dict]) -> str:
     criteria = "\n".join(f"- {k}: {v}" for k, v in RUBRIC.items())
     blocks = []
     for n, item in enumerate(batch, 1):
-        evidence = "\n".join(
-            f"      {i}. customer: {e['customer'][:170]}\n"
-            f"         Apple replied: {e['reply'][:220]}"
-            for i, e in enumerate(item.get("evidence", [])[:5], 1)
-        ) or "      (no precedent was retrieved)"
+        evidence = (
+            "\n".join(
+                f"      {i}. customer: {e['customer'][:170]}\n"
+                f"         Apple replied: {e['reply'][:220]}"
+                for i, e in enumerate(item.get("evidence", [])[:5], 1)
+            )
+            or "      (no precedent was retrieved)"
+        )
         blocks.append(
             f"--- REPLY {n} ---\n"
             f"  customer wrote: {item['message'][:300]}\n"

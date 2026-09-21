@@ -32,19 +32,19 @@ from genius_bar.data import agent_replies, clean_text, load_threads
 
 # "we've sent you a DM" -- the reply exists but the resolution is private.
 DEFLECTION = re.compile(
-    r"\b(?:DM|direct message)\b|send us a (?:DM|message)|meet us in", re.I
+    r"\b(?:DM|direct message)\b|send us a (?:DM|message)|meet us in", re.IGNORECASE
 )
 # Concrete guidance the customer can act on.
 STEPS = re.compile(
     r"\b(?:try|tap|go to|open|settings|restart|toggle|turn (?:off|on)|"
     r"sign out|reset|update to|navigat\w+|check)\b",
-    re.I,
+    re.IGNORECASE,
 )
 # A diagnostic question. Not a resolution, but genuinely how Apple opens.
 DIAGNOSTIC = re.compile(
     r"\b(?:which|what) (?:version|model|ios|macos)\b|can you (?:tell|let) us|"
     r"what happens when|are you (?:seeing|getting)",
-    re.I,
+    re.IGNORECASE,
 )
 LINK = re.compile(r"\[support link\]")
 
@@ -87,7 +87,9 @@ class Retriever:
     """
 
     def __init__(self, corpus: pd.DataFrame | None = None):
-        self.corpus = build_corpus() if corpus is None else corpus.reset_index(drop=True)
+        self.corpus = (
+            build_corpus() if corpus is None else corpus.reset_index(drop=True)
+        )
         self.vectorizer = TfidfVectorizer(
             ngram_range=(1, 2),
             min_df=2,
@@ -118,11 +120,13 @@ class Retriever:
             if reply in seen:
                 continue
             seen.add(reply)
-            out.append({
-                "customer": self.corpus.at[i, "customer_clean"],
-                "reply": reply,
-                "score": float(scores[i]),
-            })
+            out.append(
+                {
+                    "customer": self.corpus.at[i, "customer_clean"],
+                    "reply": reply,
+                    "score": float(scores[i]),
+                }
+            )
             if len(out) == k:
                 break
         return out
@@ -130,12 +134,16 @@ class Retriever:
 
 if __name__ == "__main__":
     r = Retriever()
-    print(f"corpus: {len(r.corpus):,} pairs, "
-          f"{r.corpus['reply_clean'].nunique():,} unique replies, "
-          f"{len(r.vectorizer.vocabulary_):,} features\n")
-    for q in ["my battery drains so fast since the update",
-              "all my contacts are gone after updating",
-              "fix the I glitch"]:
+    print(
+        f"corpus: {len(r.corpus):,} pairs, "
+        f"{r.corpus['reply_clean'].nunique():,} unique replies, "
+        f"{len(r.vectorizer.vocabulary_):,} features\n"
+    )
+    for q in [
+        "my battery drains so fast since the update",
+        "all my contacts are gone after updating",
+        "fix the I glitch",
+    ]:
         print(f"Q: {q}")
         for hit in r.search(q, k=2):
             print(f"   [{hit['score']:.3f}] {hit['reply'][:110]}")

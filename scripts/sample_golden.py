@@ -39,15 +39,16 @@ from genius_bar.data import REPO_ROOT, first_inbound, load_threads
 
 OUT_PATH = REPO_ROOT / "data" / "golden_unlabelled.jsonl"
 
-PER_INTENT_FLOOR = 10   # below this, per-class F1 is noise
-PER_INTENT_CAP = 27     # ~15% of 180; stops update_performance dominating
+PER_INTENT_FLOOR = 10  # below this, per-class F1 is noise
+PER_INTENT_CAP = 27  # ~15% of 180; stops update_performance dominating
 
 # Hard cases, over-sampled on purpose. A golden set of only clean cases measures
 # nothing interesting -- these are where the system is expected to struggle and
 # where the escalation policy has to earn its keep.
 NON_ENGLISH_WORDS = re.compile(
     r"\b(je|j'ai|que|qué|não|nao|para|pero|el|las|und|der|ich|nicht|bir|ben|"
-    r"olarak|ile|मेरा|هذا|على|في)\b", re.I
+    r"olarak|ile|मेरा|هذا|على|في)\b",
+    re.IGNORECASE,
 )
 NON_LATIN = re.compile(r"[؀-ۿऀ-ॿЀ-ӿ一-鿿぀-ヿ]")
 MIN_HARD_CASES = {"non_english": 6, "image_only": 6, "very_short": 6}
@@ -67,9 +68,12 @@ def tag_hard_cases(text: str, raw: str = "") -> list[str]:
     hard case -- the actual content is in an image nothing here can read.
     """
     tags = []
-    if raw and re.search(r"https?://(?:t\.co|pic\.twitter)", raw):
-        if len(re.sub(r"https?://\S+", "", raw).strip()) < 45:
-            tags.append("image_only")
+    if (
+        raw
+        and re.search(r"https?://(?:t\.co|pic\.twitter)", raw)
+        and (len(re.sub(r"https?://\S+", "", raw).strip()) < 45)
+    ):
+        tags.append("image_only")
     if NON_LATIN.search(text) or len(NON_ENGLISH_WORDS.findall(text)) >= 2:
         tags.append("non_english")
     if len(text) < 40:
@@ -133,8 +137,10 @@ def main() -> None:
         nat = shares[name] / len(first)
         print(f"{name:22} {shares[name]:10,} {nat:8.1%} {alloc.get(name, 0):10}")
     print(f"{'TOTAL':22} {len(first):10,} {'':8} {sum(alloc.values()):10}")
-    print(f"\nnot_actionable has no rule of its own, so it has no stratum: its\n"
-          f"examples come from '{UNMATCHED}', which the human labeller resolves.")
+    print(
+        f"\nnot_actionable has no rule of its own, so it has no stratum: its\n"
+        f"examples come from '{UNMATCHED}', which the human labeller resolves."
+    )
 
     picked = []
     for name, k in alloc.items():
@@ -147,11 +153,11 @@ def main() -> None:
     # Top up under-represented hard cases by swapping, not appending, so the
     # total stays at n.
     for tag, want in MIN_HARD_CASES.items():
-        have = golden["hard_cases"].map(lambda t: tag in t).sum()
+        have = golden["hard_cases"].map(lambda t, tag=tag: tag in t).sum()
         if have >= want:
             continue
         pool = first[
-            first["hard_cases"].map(lambda t: tag in t)
+            first["hard_cases"].map(lambda t, tag=tag: tag in t)
             & ~first["tweet_id"].isin(golden["tweet_id"])
         ]
         extra = pool.sample(n=min(want - have, len(pool)), random_state=args.seed)
@@ -163,9 +169,7 @@ def main() -> None:
             n=min(len(extra), (golden["proxy_intent"] == biggest).sum()),
             random_state=args.seed,
         )
-        golden = pd.concat(
-            [golden.drop(index=drop.index), extra], ignore_index=True
-        )
+        golden = pd.concat([golden.drop(index=drop.index), extra], ignore_index=True)
         print(f"topped up {tag}: +{len(extra)} (swapped out of {biggest})")
 
     golden = golden.sample(frac=1.0, random_state=args.seed).reset_index(drop=True)
@@ -185,19 +189,27 @@ def main() -> None:
 
     with OUT_PATH.open("w") as fh:
         for i, row in golden.iterrows():
-            fh.write(json.dumps({
-                "id": int(row["tweet_id"]),
-                "thread_id": int(row["thread_id"]),
-                "message": row["clean"],
-                "proxy_intent": row["proxy_intent"],
-                "hard_cases": row["hard_cases"],
-                "weight": round(weights[row["proxy_intent"]], 3),
-                "pass": "blind" if i in blind else "assisted",
-                # left for the human: intent, should_escalate, notes
-            }, ensure_ascii=False) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "id": int(row["tweet_id"]),
+                        "thread_id": int(row["thread_id"]),
+                        "message": row["clean"],
+                        "proxy_intent": row["proxy_intent"],
+                        "hard_cases": row["hard_cases"],
+                        "weight": round(weights[row["proxy_intent"]], 3),
+                        "pass": "blind" if i in blind else "assisted",
+                        # left for the human: intent, should_escalate, notes
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
-    print(f"\nwrote {OUT_PATH.relative_to(REPO_ROOT)}: {len(golden)} examples "
-          f"({len(blind)} blind, {len(golden) - len(blind)} assisted)")
+    print(
+        f"\nwrote {OUT_PATH.relative_to(REPO_ROOT)}: {len(golden)} examples "
+        f"({len(blind)} blind, {len(golden) - len(blind)} assisted)"
+    )
     hard = pd.Series([t for tags in golden["hard_cases"] for t in tags]).value_counts()
     print(f"hard cases: {hard.to_dict()}")
     print("\nNext: uv run python -m genius_bar.label")

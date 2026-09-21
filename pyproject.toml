@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.14"]
 
 [build-system]
 requires = ["uv_build>=0.10,<0.11"]
@@ -26,6 +26,15 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "genius_bar"
 module-root = ""
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint.per-file-ignores]
+# Test doubles deliberately raise bare Exception to mimic SDK errors, and hold
+# fake state as class attributes. Neither is worth a custom exception class.
+"tests/*" = ["TRY002", "RUF012"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

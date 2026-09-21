@@ -29,8 +29,9 @@ import os
 import re
 import sys
 import time
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import Any
 
 import numpy as np
 from tenacity import retry, retry_if_exception, stop_after_attempt
@@ -48,10 +49,10 @@ EMBED_CACHE = CACHE_DIR / "embed"
 # A side benefit worth stating in the report -- the judge is no longer the same
 # model as the drafter, which weakens self-enhancement bias rather than merely
 # disclosing it.
-PRIMARY = "gemini-3.5-flash"          # classify + draft
-JUDGE = "gemini-3.5-flash-lite"       # reply scoring; same family, different model
-SUGGEST = "gemini-3.1-flash-lite"     # assisted-pass pre-labels
-ALT_JUDGE = "gemma-4-26b-a4b-it"      # cross-family check; not Gemini at all
+PRIMARY = "gemini-3.5-flash"  # classify + draft
+JUDGE = "gemini-3.5-flash-lite"  # reply scoring; same family, different model
+SUGGEST = "gemini-3.1-flash-lite"  # assisted-pass pre-labels
+ALT_JUDGE = "gemma-4-26b-a4b-it"  # cross-family check; not Gemini at all
 
 # gemini-3.7-flash and gemma-4-31b-it were the original picks. The first is
 # quota-exhausted and the second returns 503; both are kept here only so the
@@ -82,6 +83,7 @@ NO_THINKING_CONFIG = {"gemini-3.5-flash-lite", "gemini-3.5-flash-image"}
 
 def _supports_thinking(model: str) -> bool:
     return not (model.startswith("gemma") or model in NO_THINKING_CONFIG)
+
 
 # Spacing between live calls, to stay under the per-minute cap. Only applies on
 # cache misses, so a cached replay is unaffected. Embeddings get their own
@@ -191,7 +193,9 @@ def _is_transient(exc: BaseException) -> bool:
 def _is_too_large(exc: BaseException) -> bool:
     """A genuine payload-size rejection, which splitting the batch does fix."""
     text = f"{type(exc).__name__}: {exc}"
-    return "400" in text and ("at most" in text or "too large" in text or "exceeds" in text)
+    return "400" in text and (
+        "at most" in text or "too large" in text or "exceeds" in text
+    )
 
 
 def _retry_after(exc: BaseException, default: float = 30.0) -> float:
@@ -235,9 +239,13 @@ def _parse_json(raw: str) -> Any:
     stop=stop_after_attempt(6),
     reraise=True,
 )
-def _call_gemini(prompt: str, model: str, schema: dict | None, thinking: int | None) -> str:
+def _call_gemini(
+    prompt: str, model: str, schema: dict | None, thinking: int | None
+) -> str:
     client = _get_client()
-    config: dict[str, Any] = {"temperature": 0.0}  # determinism: the cache must be repeatable
+    config: dict[str, Any] = {
+        "temperature": 0.0
+    }  # determinism: the cache must be repeatable
     if thinking is not None and _supports_thinking(model):
         config["thinking_config"] = {"thinking_budget": thinking}
     if schema is not None:
@@ -274,7 +282,9 @@ def generate(
     response = _parse_json(raw) if schema is not None else raw
 
     LLM_CACHE.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({**key, "response": response}, indent=2, ensure_ascii=False))
+    path.write_text(
+        json.dumps({**key, "response": response}, indent=2, ensure_ascii=False)
+    )
     return response
 
 
@@ -387,8 +397,12 @@ def _embed_live(
 
         if _is_too_large(exc) and len(texts) > 1:
             mid = len(texts) // 2
-            print(f"[embed] batch of {len(texts)} too large; splitting", file=sys.stderr)
-            return _embed_live(texts[:mid], model, dim) + _embed_live(texts[mid:], model, dim)
+            print(
+                f"[embed] batch of {len(texts)} too large; splitting", file=sys.stderr
+            )
+            return _embed_live(texts[:mid], model, dim) + _embed_live(
+                texts[mid:], model, dim
+            )
 
         raise
 
@@ -436,7 +450,9 @@ def embed(
         try:
             for start in range(0, len(missing), EMBED_BATCH):
                 chunk = missing[start : start + EMBED_BATCH]
-                for k, vec in zip(chunk, _embed_live([by_key[k] for k in chunk], model, dim)):
+                for k, vec in zip(
+                    chunk, _embed_live([by_key[k] for k in chunk], model, dim)
+                ):
                     store[k] = vec
         finally:
             # Flush even on failure: these vectors cost quota, and a crash

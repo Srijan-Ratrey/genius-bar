@@ -1,5 +1,5 @@
 # genius-bar. `make eval` is the one target that must work with no API key.
-.PHONY: help data taxonomy golden label recheck rate eval test reproduce clean-cache
+.PHONY: help data taxonomy golden label recheck rate eval test fmt lint reproduce clean-cache
 
 help:  ## Show this list
 	@grep -hE '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t14
@@ -27,6 +27,12 @@ eval:  ## Reproduce all headline results. Works with NO API key when cache is wa
 
 test:  ## Run the test suite
 	uv run pytest -q
+
+fmt:  ## Format all source with ruff
+	uv run ruff format genius_bar/ scripts/ tests/
+
+lint:  ## Lint all source with ruff
+	uv run ruff check genius_bar/ scripts/ tests/
 
 reproduce:  ## What a grader runs: install, test, eval. Target is under 15 minutes.
 	uv sync
