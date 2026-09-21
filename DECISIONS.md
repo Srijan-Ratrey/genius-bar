@@ -1,7 +1,104 @@
 # Decision log
 
-Non-obvious choices and why, appended as the project was built. The assignment
-asks for 10-15; the ones that changed the design are marked **load-bearing**.
+The assignment asks for 10-15 non-obvious decisions. These are the sixteen that
+changed what got built or what the numbers mean. The full working log -- 64
+entries written as the work happened -- is kept as an appendix below, because
+several of the smaller ones are the evidence behind these.
+
+1. **Chose AppleSupport, the harder brand.** Delta or SpotifyCares have crisper
+   intents and would have produced prettier numbers. Apple deflects to DM on
+   53.5% of replies, which makes "grounded in historical resolutions" genuinely
+   hard -- and that difficulty is the interesting part of the problem.
+
+2. **Redefined "good" downward, and cut resolution generation entirely.** With
+   53.5% of replies deflecting to DM and 75.9% linking articles absent from the
+   dataset, Apple's public record contains almost no completed resolutions.
+   Generating them would mean inventing them. The system drafts a faithful
+   *first response* instead, and the report says so rather than overclaiming.
+
+3. **Escalation is a deterministic Python policy, not a model call.** Every
+   escalation traces to a named rule, which is what "with a stated reason"
+   actually requires; it is testable as a truth table; and the 10:1 cost
+   asymmetry is a business judgement that belongs in code a human can argue
+   with, not inside a prompt.
+
+4. **Derived the taxonomy by clustering, then hand-fixed it.** The LLM only
+   *names* what clustering found. Asking a model to invent a taxonomy produces
+   something plausible and unfalsifiable, and "why these intents?" is the first
+   question a reviewer asks.
+
+5. **Reported that the clusters barely exist.** Best silhouette 0.085 at k=8.
+   Below ~0.15 there is no real structure, so this taxonomy is imposed on a
+   continuum. That caps how high intent accuracy can honestly go, and it is
+   stated rather than buried.
+
+6. **Merged the clusters that differed by register, not intent.** KMeans
+   produced four near-duplicate "iOS 11 broke my phone" groups separated mainly
+   by profanity, and the namer labelled the angry ones "not a support request".
+   Left alone, the classifier would have learned that swearing changes what a
+   customer needs. Anger became an escalation signal instead.
+
+7. **Retrieval is TF-IDF, not embeddings.** The free embedding quota is 1,000
+   texts per *day*, counted per text rather than per batch, so a grounding
+   corpus is several days of quota -- no basis for something graders must
+   reproduce.
+
+8. **Gave the baseline the same retriever as the agent.** Holding retrieval
+   constant makes the measured gap attributable to the drafting step alone.
+   Changing retrieval and generation together would have produced a bigger
+   number that attributed nothing.
+
+9. **Stratified the golden set with the keyword rules, knowing it favours the
+   baseline.** Pure random sampling gives the rare high-risk classes one example
+   each; stratifying by LLM flatters the system under test. The rule proxy's
+   bias runs *against* the system being sold, which is the direction to accept.
+
+10. **Enforced the blind/assisted split rather than just recording it.** The 60
+    blind labels see no model output at all. They are the only ones that can
+    carry an agreement claim, and they are never blended into the headline --
+    the agent scores 0.783 on them against 0.833 overall, and that gap is
+    exactly what contamination looks like.
+
+11. **Committed the LLM response cache as a fixture.** It is what makes
+    `make eval` reproduce every number with no API key, no network, in 25
+    seconds. Verified from a clean clone, not assumed.
+
+12. **Split each pipeline stage onto its own model.** The free tier allows 20
+    generate requests per day *per model*. Classify/draft, judging and
+    pre-labelling now run on different models. The constraint improved the
+    design: judge and drafter were the same model, and being forced apart
+    weakens self-enhancement bias rather than merely disclosing it.
+
+13. **Rewrote the judge after catching it rubber-stamping.** It rated a baseline
+    that copies replies verbatim at 4.86/5, with 98% of scores being 5s. The
+    fix was the criteria, not the scale: it never asked whether a reply
+    addressed *this* customer. Adding that plus an `interchangeable` flag
+    produced a clean 100%/30%/10% separation.
+
+14. **Measured the judge against 30 hand ratings, and downgraded the claims.**
+    Quadratic kappa 0.130, +1.01 systematically generous, a flat 5.00 on
+    groundedness against a human 3.70. Reply-quality figures therefore support
+    an ordering and nothing finer. The intent and escalation results do not
+    route through the judge.
+
+15. **Refused to tune the confidence threshold on the evaluation set.** Moving
+    it from 0.60 to 0.90 would cut cost/100 from 55.0 to 34.4 and catch 21 of 30
+    errors instead of 2. That number was found by looking at the test set, so
+    applying it would be the exact overfitting this report warns about
+    elsewhere. It is filed as future work needing a validation split.
+
+16. **Named two things that did not get done.** The cross-family judge check was
+    abandoned -- no usable non-Gemini model exists on this tier -- so
+    self-enhancement bias is recorded as unmitigated. Annotator self-consistency
+    was never measured, so the accuracy ceiling is unknown; that is flagged as
+    the weakest point in the evaluation rather than omitted.
+
+---
+
+# Appendix: full working log
+
+Written as the work happened, not reconstructed afterwards. Entries marked
+**load-bearing** changed the design.
 
 ## Framing
 

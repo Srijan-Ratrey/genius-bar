@@ -27,8 +27,9 @@ make eval                # reproduce all headline numbers -- NO API KEY NEEDED
 ```
 
 `make eval` replays a committed response cache, so it recomputes every number
-offline. `make reproduce` is the full grader path (`uv sync && pytest && eval`)
-and is the thing held to the 15-minute budget.
+offline. `make reproduce` is the full grader path (`uv sync && pytest && eval`).
+**Measured from a clean clone with no API key and no Kaggle credentials: 25
+seconds**, producing results byte-identical to those in this README.
 
 To regenerate rather than replay, put `GEMINI_API_KEY` in `.env` (see
 [.env.example](.env.example)). To rebuild the data subsample from scratch you
@@ -579,8 +580,9 @@ data/  intents.yaml, apple_threads.parquet, golden*.jsonl
 cache/ committed LLM + embedding responses (this is what makes eval offline)
 ```
 
-[DECISIONS.md](DECISIONS.md) is the decision log — 54 entries, written as the
-work happened rather than reconstructed afterwards. [plan.md](plan.md) is the
+[DECISIONS.md](DECISIONS.md) is the decision log: the 16 decisions that changed
+what got built or what the numbers mean, with the full 64-entry working log kept
+as an appendix behind them. [plan.md](plan.md) is the
 original plan.
 
 ## Credits
