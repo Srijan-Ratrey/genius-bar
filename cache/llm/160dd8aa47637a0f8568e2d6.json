@@ -1,0 +1,21 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "Rate this proposed Apple Support reply from 1 to 5 overall.\n\ncustomer: my battery drains so fast since the iOS 11 update\nreply: We'd like to help. Can you tell us which version of iOS is installed in Settings > General > About?\n\nReturn a JSON array with exactly one object: [{\"score\": N}]",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "type": "integer",
+          "description": "1-5"
+        }
+      },
+      "required": [
+        "score"
+      ]
+    }
+  },
+  "thinking": null,
+  "response": []
+}

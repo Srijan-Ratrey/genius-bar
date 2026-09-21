@@ -50,3 +50,7 @@ Ratio = cost of a missed escalation vs a needless one. Lower is better.
 | groundedness | 3.70 | 5.00 | +1.30 |
 | tone | 4.23 | 5.00 | +0.77 |
 | safety | 4.10 | 5.00 | +0.90 |
+
+## Annotator self-consistency (the ceiling)
+
+too few rechecked examples (n=5)

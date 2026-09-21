@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 
 from genius_bar import judge as judge_mod
@@ -405,6 +406,14 @@ def build_report(results: dict) -> str:
                 "at or above it is measuring label noise, not skill.",
             ]
 
+    if results.get("skipped"):
+        lines += ["", "## Not computed in this run", ""]
+        lines += [f"- {w} (no cache entry and no API key)" for w in results["skipped"]]
+        lines += [
+            "",
+            "Every other number above was reproduced from the committed cache.",
+        ]
+
     return "\n".join(lines) + "\n"
 
 
@@ -412,7 +421,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=None, help="evaluate only the first N")
     ap.add_argument("--no-judge", action="store_true", help="skip reply scoring")
-    ap.add_argument("--cross-family", type=int, default=40, help="0 to skip")
+    ap.add_argument(
+        "--cross-family",
+        type=int,
+        default=0,
+        help="re-score N replies with a non-Gemini judge. Default 0: no usable "
+        "non-Gemini model exists on the free tier (see README 7.3).",
+    )
     ap.add_argument(
         "--judge-sample",
         type=int,
@@ -446,17 +461,25 @@ def main() -> None:
         "systems": {},
     }
 
+    skipped: list[str] = []
     all_scores: dict[str, list] = {}
     for name, preds in systems.items():
         scores = [None] * len(preds)
         if not args.no_judge:
+            # Degrade, never abort. A missing cache entry must not discard the
+            # intent and escalation results, which are the load-bearing ones and
+            # need no model at all at this point.
             # Score a fixed prefix so every system is judged on the SAME
             # examples -- a different sample per system would make the
             # comparison between them meaningless.
             limit = args.judge_sample or len(preds)
             print(f"judging {name} (first {min(limit, len(preds))} examples)...")
-            judged = judge_mod.judge_replies([t.to_dict() for t in preds[:limit]])
-            scores = judged + [None] * (len(preds) - len(judged))
+            try:
+                judged = judge_mod.judge_replies([t.to_dict() for t in preds[:limit]])
+                scores = judged + [None] * (len(preds) - len(judged))
+            except llm.CacheMiss:
+                skipped.append(f"reply judging for '{name}'")
+                print(f"  [skipped] not cached and no API key", file=sys.stderr)
         all_scores[name] = scores
         results["systems"][name] = {
             "intent": _intent_block(golden, preds),
@@ -483,6 +506,14 @@ def main() -> None:
             metrics.agreement([p for p, _ in pairs], [a for _, a in pairs])
             if len(pairs) >= 10
             else {"n": len(pairs), "note": "too few paired scores"}
+        )
+
+    results["skipped"] = skipped
+    if skipped:
+        print(
+            f"\n[note] {len(skipped)} stage(s) skipped for lack of cache/key: "
+            f"{', '.join(skipped)}",
+            file=sys.stderr,
         )
 
     REPORTS.mkdir(exist_ok=True)

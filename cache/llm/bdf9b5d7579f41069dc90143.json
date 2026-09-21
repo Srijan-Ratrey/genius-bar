@@ -1,0 +1,19 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "prompt": "JSON: field s = 'ok'",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "s": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "s"
+    ]
+  },
+  "thinking": null,
+  "response": {
+    "s": "ok"
+  }
+}

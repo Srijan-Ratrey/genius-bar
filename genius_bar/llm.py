@@ -98,6 +98,14 @@ class CacheMiss(RuntimeError):
     """Raised when a prompt isn't cached and there's no key to fetch it live."""
 
 
+class MalformedResponse(RuntimeError):
+    """The model returned something that is not parseable JSON.
+
+    Usually truncation: the response hit the output-token ceiling mid-string.
+    Recoverable by asking for fewer items, so callers bisect rather than abort.
+    """
+
+
 class _Budget:
     """Counts live requests so quota use is visible rather than a surprise 429."""
 
@@ -226,11 +234,22 @@ def _parse_json(raw: str) -> Any:
 
     Gemma ignores response_mime_type and wraps output in ```json fences even
     when a schema is supplied, so stripping them is required, not defensive.
+
+    A still-unparseable response raises MalformedResponse rather than
+    JSONDecodeError, so callers can tell "the model produced garbage, retry
+    smaller" apart from a genuine bug in our own JSON handling.
     """
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
+        pass
+    try:
         return json.loads(_FENCE.sub("", raw))
+    except json.JSONDecodeError as exc:
+        raise MalformedResponse(
+            f"unparseable response ({exc}); likely truncated at "
+            f"{len(raw)} chars: {raw[-80:]!r}"
+        ) from exc
 
 
 @retry(
@@ -309,7 +328,17 @@ def map_batched(
 
     for start in range(0, len(items), batch_size):
         batch = items[start : start + batch_size]
-        result = generate(build_prompt(batch), schema, model=model, thinking=thinking)
+        try:
+            result = generate(
+                build_prompt(batch), schema, model=model, thinking=thinking
+            )
+        except MalformedResponse as exc:
+            print(
+                f"[llm] batch at {start} unparseable ({exc}); bisecting",
+                file=sys.stderr,
+            )
+            out.extend(_bisect(batch, build_prompt, schema, model, thinking))
+            continue
 
         if isinstance(result, list) and len(result) == len(batch):
             out.extend(result)
@@ -341,13 +370,28 @@ def _bisect(
     misaligned batch attaches every result to the wrong input.
     """
     if len(batch) == 1:
-        single = generate(build_prompt(batch), schema, model=model, thinking=thinking)
+        try:
+            single = generate(
+                build_prompt(batch), schema, model=model, thinking=thinking
+            )
+        except MalformedResponse as exc:
+            # One item that cannot be parsed even alone. Yield None rather than
+            # abort: losing one judgement is far better than discarding an
+            # entire run's worth of quota over a single bad response.
+            print(f"[llm] dropping unparseable single item: {exc}", file=sys.stderr)
+            return [None]
         return [single[0] if isinstance(single, list) and single else None]
 
     mid = len(batch) // 2
     out: list[Any] = []
     for half in (batch[:mid], batch[mid:]):
-        result = generate(build_prompt(half), schema, model=model, thinking=thinking)
+        try:
+            result = generate(
+                build_prompt(half), schema, model=model, thinking=thinking
+            )
+        except MalformedResponse:
+            out.extend(_bisect(half, build_prompt, schema, model, thinking))
+            continue
         if isinstance(result, list) and len(result) == len(half):
             out.extend(result)
         else:

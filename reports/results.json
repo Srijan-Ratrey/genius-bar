@@ -1182,5 +1182,9 @@
       }
     }
   },
-  "self_consistency": null
+  "self_consistency": {
+    "n": 5,
+    "note": "too few rechecked examples"
+  },
+  "skipped": []
 }

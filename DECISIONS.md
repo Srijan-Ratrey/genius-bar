@@ -374,3 +374,27 @@ asks for 10-15; the ones that changed the design are marked **load-bearing**.
     report claims "120 assisted, model pre-labels, human corrects", and that
     claim is only true for records where a suggestion reached the screen. Now
     stored per record as `suggestion_shown`.
+
+61. **The cross-family judge check was abandoned, not quietly dropped.** The
+    plan was to bound self-enhancement bias by re-scoring with a non-Gemini
+    model. None is usable on the free tier: Gemini pro 429s, `gemma-4-31b-it`
+    503s, and `gemma-4-26b-a4b-it` either degenerates into a repetition loop
+    ("importance is importance is...", 229,030 characters) or returns an empty
+    array for a single-item prompt. Disabled by default and recorded as an
+    unmitigated caveat rather than presented as done.
+
+62. **`make eval` degrades instead of aborting.** *load-bearing.* A missing
+    cache entry used to kill the whole run, discarding the intent and
+    escalation results -- which need no model at all at that point. Each
+    judging stage is now independently recoverable, and anything skipped is
+    named in the report so a partial run can never be mistaken for a full one.
+
+63. **Malformed model output is recoverable, not fatal.** A truncated or
+    degenerate response raises `MalformedResponse`, and callers bisect. One bad
+    response previously destroyed a run that had already spent most of a day's
+    quota. An item unparseable even alone yields None: losing one judgement
+    beats losing the run.
+
+64. **`max_output_tokens` is set explicitly.** Without it a batched request
+    whose JSON exceeds the model default comes back truncated mid-string and
+    unparseable, which reads like a code bug rather than a capacity limit.

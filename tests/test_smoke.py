@@ -714,3 +714,58 @@ def test_models_that_reject_thinking_config_are_recognised():
     # Every model this project actually calls must be handled, not just known.
     for model in (llm.PRIMARY, llm.JUDGE, llm.SUGGEST, llm.ALT_JUDGE):
         llm._supports_thinking(model)  # must not raise
+
+
+def test_truncated_response_is_recovered_not_fatal(monkeypatch):
+    """A truncated JSON response must not destroy an entire run.
+
+    Observed with Gemma: a batch of 3 judge items exceeded the output-token
+    ceiling and came back cut off mid-string. That single bad response
+    propagated a JSONDecodeError and killed a run that had already spent most
+    of a day's quota. It is recoverable -- ask for fewer items.
+    """
+    seen = []
+
+    def fake(prompt, schema, model=None, thinking=0):
+        n = prompt.count("|")
+        seen.append(n)
+        if n > 1:
+            raise llm.MalformedResponse("unparseable response; likely truncated")
+        return [{"v": 1}]
+
+    monkeypatch.setattr(llm, "generate", fake)
+
+    out = llm.map_batched(
+        ["a", "b", "c", "d"],
+        lambda b: "".join(f"|{x}" for x in b),
+        {"type": "object"},
+        batch_size=4,
+    )
+
+    assert len(out) == 4, "every item must still get a slot"
+    assert all(r is not None for r in out), (
+        "singles parsed fine, none should be dropped"
+    )
+
+
+def test_item_unparseable_even_alone_yields_none(monkeypatch):
+    """Losing one judgement beats discarding the whole run."""
+    monkeypatch.setattr(
+        llm,
+        "generate",
+        lambda *a, **k: (_ for _ in ()).throw(llm.MalformedResponse("always broken")),
+    )
+    out = llm.map_batched(
+        ["a", "b"],
+        lambda b: "".join(f"|{x}" for x in b),
+        {"type": "object"},
+        batch_size=2,
+    )
+    assert out == [None, None]
+
+
+def test_parse_json_distinguishes_garbage_from_fences():
+    assert llm._parse_json('{"a": 1}') == {"a": 1}
+    assert llm._parse_json('```json\n{"a": 1}\n```') == {"a": 1}
+    with pytest.raises(llm.MalformedResponse, match="unparseable"):
+        llm._parse_json('{"a": "unterminated')

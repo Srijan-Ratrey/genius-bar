@@ -301,9 +301,14 @@ same examples for every system) so a fresh run fits inside one day.
   blind subset, plus judge bias (is it systematically generous?). Both are
   reported because they fail differently: a judge that is consistently one point
   generous looks terrible on kappa and near-perfect on Spearman.
-- **Cross-family check** — a subset re-scored by `gemma-4-26b-a4b-it`, a different
-  model family. Low correlation would mean much of the primary judge's score is
-  family-specific taste rather than quality.
+- **Cross-family check — attempted and abandoned.** The plan was to re-score a
+  subset with a non-Gemini model to bound shared-family bias. No usable one
+  exists on this tier: Gemini pro returns 429, `gemma-4-31b-it` returns 503,
+  and `gemma-4-26b-a4b-it` degenerated into a repetition loop
+  (*"importance is importance is…"*, 229,030 characters) or returned an empty
+  array even for a single-item prompt. The check is disabled by default. The
+  judge-vs-human agreement below is stronger evidence anyway, since it is
+  grounded in human ratings rather than in a second model's opinion.
 
 ### 5. Results vs baselines
 
@@ -490,6 +495,10 @@ Mandatory section, and most of it is already known before the numbers exist.
    copy-verbatim baseline 4.86/5. Treat every reply-quality figure as an
    ordering, never a score. The intent and escalation results do not route
    through the judge and are unaffected.
+
+   Self-enhancement bias also remains **unmitigated**: judge and drafter are
+   different models but the same family, and the planned non-Gemini cross-check
+   could not be run because no usable non-Gemini model exists on this tier (§4).
 4. **Sampling favours the baseline, not the agent.** Stated plainly because it
    cuts the other way from everything else here: strata came from the same
    keyword rules the simple baseline uses.
